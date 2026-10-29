@@ -8,7 +8,7 @@ import { prototypeBar } from './layout.js'
 export function emailView() {
   return html`${prototypeBar()}
     <main class="email-stage">
-      <p class="email-caption">${volunteer.firstName} signed up on peopleforapause.org. A minute later, this email arrives:</p>
+      <p class="email-caption">${volunteer.firstName} signed up on peopleforapause.org with their name, email and location. A minute later, this email arrives:</p>
       <article class="email" data-testid="welcome-email">
         <header class="email-head">
           <h1 class="email-subject">${mail.subject}</h1>

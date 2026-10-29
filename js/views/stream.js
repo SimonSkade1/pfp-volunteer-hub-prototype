@@ -17,8 +17,7 @@ export function streamView(id) {
 
   let body
   if (status === 'member') {
-    const parts = [taskList(stream), resourceList(stream)]
-    body = html`${stream.resourcesFirst ? parts.reverse() : parts}${stream.discord ? discordLine(stream) : ''}`
+    body = html`${taskList(stream)}${resourceList(stream)}${stream.discord ? discordLine(stream) : ''}`
   } else if (status === 'pending') {
     body = html`${pendingBox(stream)}${preview(stream)}`
   } else {

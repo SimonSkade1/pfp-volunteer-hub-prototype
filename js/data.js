@@ -255,7 +255,6 @@ export const streams = [
     commitment: 'A few hours, once',
     where: 'From home',
     discord: '#op-eds',
-    resourcesFirst: true, // mostly resources, few tasks
     description: [
       'A letter to the editor (150–250 words) or an op-ed (600–750 words) in your local paper reaches thousands of people where you live, and congressional staff clip them for their boss.',
       'No writing experience needed: watch the workshop recording, use the guide, and a volunteer editor gives you feedback before you submit.',
@@ -461,7 +460,7 @@ export const groups = [
     nextMeeting: 'Thu Nov 12, 7 pm, at the Royal Oak Public Library',
     discord: '#detroit-area',
     description: [
-      'We’re neighbors from Detroit, Dearborn, Royal Oak and Ann Arbor who want our representatives to back an international treaty that bans superintelligence.',
+      'We’re neighbors from Detroit, Dearborn, Royal Oak and Troy who want our representatives to back an international treaty that bans superintelligence.',
       'We meet every other Thursday at 7 pm, alternating between the Royal Oak Public Library and Zoom, and we run one public event a month.',
     ],
     expectations:

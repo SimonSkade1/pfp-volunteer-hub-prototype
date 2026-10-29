@@ -1997,6 +1997,10 @@ textarea::placeholder {
     align-items: stretch;
   }
 
+  .lead-box .badge {
+    align-self: flex-start;
+  }
+
   .prose,
   .howto,
   .expectations,

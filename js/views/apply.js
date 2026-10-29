@@ -44,7 +44,7 @@ export function applyView(id) {
             <span>${item.commitmentText}</span>
           </label>`
         : ''}
-      <p class="hint">${lead} also sees what you wrote about yourself when you joined the hub${state.profile.about ? html`: “${state.profile.about}”` : '.'}</p>
+      ${state.profile.about ? html`<p class="hint">${lead} also sees what you wrote about yourself when you joined the hub: “${state.profile.about}”</p>` : ''}
       <div class="form-actions">
         <button class="btn btn-primary" type="submit" data-testid="apply-submit">Send application</button>
         <a class="btn btn-link" href="${href.item(item)}">Cancel</a>
@@ -82,7 +82,10 @@ export function leadView(kind) {
       ${kind === 'group' ? groupFields(form) : streamFields(form)}
       <label class="field">
         <span class="label">How much time can you give?</span>
-        <select name="hours" data-testid="lead-hours">${hoursOptions.map((option) => html`<option>${option}</option>`)}</select>
+        <select name="hours" required data-testid="lead-hours">
+          <option value="" disabled selected>Choose…</option>
+          ${hoursOptions.map((option) => html`<option>${option}</option>`)}
+        </select>
       </label>
       <div class="form-actions">
         <button class="btn btn-primary" type="submit" data-testid="lead-submit">Send application</button>
