@@ -164,6 +164,10 @@ def run(browser, name, options):
     tid("edit-save").click()
     tid("edit-resource-0").get_by_test_id("resource-remove").click()
     shot("lead-view-edited")
+    tid("description-edit").click()  # an editor left open closes with the page
+    tid("view-volunteer").click()
+    tid("view-lead").click()
+    expect(tid("description-text")).to_have_count(0)
     tid("view-volunteer").click()  # the volunteer side shows the edits at once
     expect(tid("stream-town-halls")).to_contain_text("25 volunteers")
     expect(page.get_by_text("Edited in the lead view.")).to_be_visible()

@@ -13,14 +13,16 @@ import { hubPage, pageTop, viewSwitch } from './layout.js'
 import { notFound } from './stream.js'
 
 // The open editor, if any: { id: the stream or group, key: 'description' | 'step:<task id>' | 'step:new' |
-// 'resource:<index>' | 'resource:new' | 'project:new' }. One at a time; every change closes it.
+// 'resource:<index>' | 'resource:new' | 'project:new' }. One at a time; every change and every new page closes it.
 let editing = null
 const isEditing = (item, key) => editing?.id === item.id && editing.key === key
+window.addEventListener('hashchange', () => {
+  editing = null // registered before app.js's render on hashchange, so it runs first
+})
 
 export function manageView(id) {
   const item = findItem(id)
   if (!item || item.kind === 'start') return notFound()
-  if (editing && editing.id !== item.id) editing = null
   const isStream = item.kind === 'stream'
 
   return hubPage(html`
