@@ -98,7 +98,7 @@ function streamCard(stream) {
     return html`<article class="card" data-testid="card-${stream.id}">
       ${cardTitle(stream)}
       <p class="card-text">${stream.tagline}</p>
-      ${metaLine('clock', [`${pluralize(stream.tasks.length, 'step')}, a few minutes each`])}
+      ${metaLine('clock', [`${pluralize(stream.tasks.length, 'step')}, about 20 minutes in all`])}
       <p class="card-tags"><span class="tag" data-testid="no-application">No application required</span></p>
     </article>`
   return html`<article class="card" data-testid="card-${stream.id}">

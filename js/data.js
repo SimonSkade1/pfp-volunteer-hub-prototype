@@ -56,7 +56,7 @@ export const streams = [
     title: 'Getting started',
     tagline: 'Your first actions, and the basics on AI risk.',
     description: [
-      'Actions you can take on your own, right now. Each takes a few minutes, so there’s always something to do, also while an application waits.',
+      'Actions you can take on your own, right now. None takes more than 15 minutes, so there’s always something to do, also while an application waits.',
     ],
     tasks: [
       {
@@ -79,7 +79,7 @@ export const streams = [
         steps: [
           'Read the About page of our website: who we are and what we stand for.',
           'Then read the Statement on Superintelligence: AI scientists and public figures from left and right call for a ban on building superintelligence.',
-          'Want more? The resources below go deeper.',
+          'Want more? The resources on the Getting started page go deeper.',
         ],
         links: [
           { label: 'About People for a Pause', href: 'https://peopleforapause.org/about/' },
