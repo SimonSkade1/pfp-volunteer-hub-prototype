@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Click through the volunteer side's demo path and screenshot every screen, at desktop and phone width.
+"""Click through the demo path, volunteer side and lead view, and screenshot every screen at desktop and phone width.
 
 Usage: scripts/walkthrough.py [url] [out_dir]
   url      default: the GitHub Pages site
@@ -129,6 +129,100 @@ def run(browser, name, options):
     expect(tid("your-detroit")).to_be_visible()
     shot("hub-joined")
 
+    # The lead view of a stream (Spec 21): applications with Claude's pre-screen, members by step, mock editing.
+    open_card("town-halls")
+    tid("view-lead").click()
+    expect(tid("manage-town-halls")).to_be_visible()
+    expect(tid("application-signals")).to_contain_text("Spam")
+    shot("lead-view-town-halls")
+    tid("application-maria").get_by_test_id("accept-application").click()
+    expect(tid("decided-maria")).to_contain_text("Accepted")
+    tid("application-signals").get_by_test_id("reject-application").click()
+    expect(tid("decided-signals")).to_contain_text("Rejected")
+    expect(tid("funnel-question")).to_contain_text("Jordan Miller (you)")  # you did the first step
+    expect(tid("funnel-find")).to_contain_text("Maria Gonzalez")
+    tid("description-edit").click()
+    expect(tid("description-text")).to_be_focused()
+    tid("description-text").fill("Town halls are where elected officials face their voters.\n\nEdited in the lead view.")
+    tid("edit-save").click()
+    expect(tid("edit-description")).to_contain_text("Edited in the lead view.")
+    tid("add-step").click()
+    tid("step-title").fill("Thank them in writing")
+    tid("step-time").fill("10 min")
+    tid("step-howto").fill("Email the office the next day.\nThank them for the answer, and repeat your ask.")
+    shot("lead-view-new-step")
+    tid("edit-save").click()
+    tid("edit-step-step-1").get_by_test_id("step-up").click()
+    expect(tid("edit-steps").locator(".edit-row").nth(3)).to_contain_text("Thank them in writing")
+    expect(tid("funnel-step-1")).to_contain_text("Wendy Carter")  # did every step before: now at the new one
+    expect(tid("funnel-done")).to_contain_text("0")
+    tid("add-resource").click()
+    tid("resource-title").fill("Sample question on video")
+    tid("resource-type").fill("Video")
+    tid("resource-note").fill("A volunteer asks our question in 40 seconds.")
+    tid("resource-link").fill("https://www.youtube.com/")
+    tid("edit-save").click()
+    tid("edit-resource-0").get_by_test_id("resource-remove").click()
+    shot("lead-view-edited")
+    tid("view-volunteer").click()  # the volunteer side shows the edits at once
+    expect(tid("stream-town-halls")).to_contain_text("25 volunteers")
+    expect(page.get_by_text("Edited in the lead view.")).to_be_visible()
+    expect(tid("step-step-1")).to_be_visible()
+    expect(tid("resources")).to_contain_text("Sample question on video")
+    expect(tid("resources")).not_to_contain_text("Town hall guide")
+    shot("town-halls-after-edits")
+
+    # The lead view of a local group: applications, the task board, a new project.
+    home()
+    open_card("detroit")
+    tid("view-lead").click()
+    expect(tid("manage-detroit")).to_be_visible()
+    expect(tid("project-evening")).to_contain_text("Jordan Miller (you)")  # your claimed task
+    shot("lead-view-detroit")
+    tid("application-nadia").get_by_test_id("accept-application").click()
+    expect(tid("decided-nadia")).to_contain_text("Accepted")
+    tid("create-project").click()
+    tid("project-name").fill("Tabling at the Royal Oak farmers market")
+    tid("project-description").fill("Sat Nov 21, 9-11 am. Goal: 15 sign-ups.")
+    tid("project-tasks").fill("Ask the market for a table\nPick up the tabling kit\nRun the table")
+    shot("lead-view-new-project", full=False)
+    tid("edit-save").click()
+    expect(tid("project-project-1")).to_contain_text("0 of 3 done")
+    shot("lead-view-detroit-project")
+    tid("view-volunteer").click()
+    expect(tid("members")).to_contain_text("Nadia Haddad")
+    new_task = tid("project-project-1").get_by_test_id("team-task-task-1")
+    new_task.get_by_test_id("claim").click()
+    expect(new_task.get_by_test_id("claim-done")).to_be_visible()
+    shot("group-after-lead-view")
+
+    # Your own application in the lead view: rejected, sent again, accepted.
+    home()
+    open_card("tabling")
+    tid("apply").click()
+    tid("apply-text").fill("The Saturday farmers market in Ann Arbor, in November.")
+    tid("apply-commit").check()
+    tid("apply-submit").click()
+    expect(tid("pending-box")).to_be_visible()
+    tid("view-lead").click()
+    expect(tid("application-you")).to_contain_text("The Saturday farmers market in Ann Arbor")
+    shot("lead-view-your-application")
+    tid("application-you").get_by_test_id("reject-application").click()
+    expect(tid("decided-you")).to_contain_text("Rejected")
+    tid("view-volunteer").click()
+    expect(tid("rejected-note")).to_be_visible()
+    shot("tabling-rejected")
+    tid("apply").click()
+    tid("apply-text").fill("The farmers market, on Nov 14.")
+    tid("apply-commit").check()
+    tid("apply-submit").click()
+    tid("view-lead").click()
+    tid("application-you").get_by_test_id("accept-application").click()
+    expect(tid("decided-you")).to_contain_text("Accepted")
+    tid("view-volunteer").click()
+    expect(tid("task-list")).to_be_visible()
+    home()
+
     # Apply to lead a local group / a stream (Spec 6.3, 6.5, 8).
     tid("lead-group").click()
     expect(tid("lead-warning")).to_be_visible()
@@ -146,9 +240,14 @@ def run(browser, name, options):
     tid("lead-submit").click()
     expect(tid("lead-sent")).to_be_visible()
 
-    # Restart goes back to the email.
+    # Restart reloads: back to the email, and the lead view's edits are gone.
     tid("restart-demo").click()
     expect(tid("welcome-email")).to_be_visible()
+    tid("open-hub").click()
+    tid("onboarding-next").click()
+    open_card("town-halls")
+    expect(tid("stream-town-halls")).to_contain_text("23 volunteers")
+    expect(page.get_by_text("Edited in the lead view.")).to_have_count(0)
 
     context.close()
     return errors

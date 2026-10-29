@@ -1219,6 +1219,7 @@ legend.label {
 
 textarea,
 input:not([type]),
+input[type='url'],
 select {
   width: 100%;
   padding: 10px 12px;
@@ -1303,6 +1304,508 @@ textarea::placeholder {
 .page-head + .prose + .form,
 .warning + .form {
   margin-top: 24px;
+}
+
+.preview-project + .preview-project {
+  margin-top: 12px;
+}
+
+.rejected-note {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--paper-2);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ---- The view switch (stream and group pages, lead view) ---- */
+
+.page-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 24px;
+}
+
+.page-top .crumb {
+  margin-bottom: 0;
+}
+
+.view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-switch-label {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.segs {
+  display: inline-flex;
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 4px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.seg + .seg {
+  border-left: 2px solid var(--ink);
+}
+
+.seg:hover {
+  background: var(--paper-2);
+}
+
+.seg.is-active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.seg-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: var(--red);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ---- Lead view (views/manage.js) ---- */
+
+.demo-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px dashed #9a9b9f;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.demo-note .demo-tag {
+  flex: none;
+  margin-top: 1px;
+}
+
+.block-lead {
+  margin: -4px 0 16px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  margin-left: 4px;
+  padding: 0 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
+  vertical-align: 2px;
+}
+
+.count-quiet {
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Applications */
+
+.applications {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.application {
+  padding: 20px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.application-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 16px;
+  margin-bottom: 12px;
+}
+
+.application-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.application-meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mini-label {
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.application-text {
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.application-about {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.application-text + .mini-label {
+  margin-top: 12px;
+}
+
+.screen {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-left: 6px solid var(--ink);
+  background: var(--paper-2);
+  font-size: 15px;
+}
+
+.screen-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.screen-head strong {
+  font-weight: 800;
+}
+
+.screen-reasons {
+  margin-top: 6px;
+  padding-left: 20px;
+}
+
+.screen-reasons li + li {
+  margin-top: 2px;
+}
+
+.screen-text {
+  margin-top: 4px;
+}
+
+.screen-accept {
+  border-left-color: var(--blue);
+  background: var(--blue-tint);
+}
+
+.screen-accept .screen-head strong {
+  color: var(--blue);
+}
+
+.screen-spam {
+  border-left-color: var(--red);
+  background: #fbe9eb;
+}
+
+.screen-spam .screen-head strong {
+  color: var(--red-deep);
+}
+
+.application-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.decided {
+  padding: 0;
+  list-style: none;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.decided li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+.decided li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.decided-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.badge-rejected {
+  padding: 1px 8px;
+  border: 2px solid var(--red);
+  background: #fff;
+  color: var(--red-deep);
+}
+
+/* Members by step (a stream) */
+
+.funnel {
+  padding: 0;
+  list-style: none;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.funnel-row {
+  padding: 12px 16px;
+}
+
+.funnel-row + .funnel-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.funnel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnel-mark,
+.edit-num {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.funnel-mark-done {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.funnel-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.funnel-count {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 0 0 0 38px;
+  list-style: none;
+}
+
+.chip {
+  padding: 2px 9px;
+  border: 1px solid var(--line-soft);
+  background: var(--paper-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chip-you {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+/* Editing (a stream) */
+
+.edit-block {
+  margin-top: 24px;
+}
+
+.edit-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.edit-block-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.edit-block > .edit-block-title {
+  margin-bottom: 10px;
+}
+
+.prose-edit {
+  max-width: none;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-size: 17px;
+}
+
+.edit-list {
+  padding: 0;
+  list-style: none;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.edit-row + .edit-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.edit-row.is-editing {
+  display: block;
+  padding: 16px;
+  background: var(--blue-tint);
+}
+
+.edit-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.edit-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.edit-sub {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.edit-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  background: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--paper-2);
+}
+
+.icon-btn:disabled,
+.btn-link:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.add-btn {
+  margin-top: 10px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-form-box {
+  padding: 16px;
+  border: 2px solid var(--ink);
+  background: var(--blue-tint);
+}
+
+.edit-form-title {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-grow {
+  flex: 1;
+}
+
+.field-narrow {
+  flex: none;
+  width: 150px;
+}
+
+.label-sm {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Projects (a group) */
+
+.add-project {
+  margin-top: 28px;
+}
+
+.open-tag {
+  padding: 1px 8px;
+  border: 2px dashed #9a9b9f;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 /* ---- Welcome email ---- */
@@ -1547,6 +2050,36 @@ textarea::placeholder {
   }
 
   .task-actions .btn-link {
+    width: auto;
+  }
+
+  .application {
+    padding: 16px;
+  }
+
+  .application-text {
+    font-size: 17px;
+  }
+
+  .chips {
+    padding-left: 0;
+  }
+
+  .edit-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .edit-tools {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+
+  .field-narrow {
     width: auto;
   }
 }

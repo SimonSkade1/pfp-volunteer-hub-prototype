@@ -18,6 +18,8 @@ export function parseRoute(hash) {
       return { name: 'apply', id: b }
     case 'lead':
       return { name: 'lead', kind: b } // 'group' | 'stream'
+    case 'manage':
+      return { name: 'manage', id: b } // the lead view of a stream or group
     default:
       return { name: 'start' } // no route: the email on a first visit, else the hub
   }
@@ -33,6 +35,7 @@ export const href = {
   item: (item) => (item.kind === 'group' ? `#/g/${item.id}` : `#/s/${item.id}`),
   apply: (id) => `#/apply/${id}`,
   lead: (kind) => `#/lead/${kind}`,
+  manage: (id) => `#/manage/${id}`,
 }
 
 export function navigate(to) {

@@ -102,7 +102,7 @@ function streamCard(stream) {
     <p class="card-text">${stream.tagline}</p>
     ${metaLine('clock', [stream.commitment])}
     ${metaLine('pin', [stream.where])}
-    ${metaLine('users', [pluralize(stream.members, 'volunteer'), `led by ${stream.lead}`])}
+    ${metaLine('users', [pluralize(memberCount(stream), 'volunteer'), `led by ${stream.lead}`])}
     ${applyArea(stream)}
   </article>`
 }

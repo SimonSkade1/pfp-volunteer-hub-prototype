@@ -1,12 +1,13 @@
 // A stream's page (Spec 18): description, task list, resources. Before you're accepted it shows what you'd do and how
 // to join; once you're in, your own progress through the stream's pipeline (Spec 19: the same steps for everyone).
 // The task page: the how-to of one step, which you can mark done; the stream page then shows the next one.
+// A stream's page has the demo's switch to its lead view (views/manage.js); Getting started has no lead.
 
-import { findStream } from '../data.js'
+import { findStream, firstName } from '../data.js'
 import { href } from '../router.js'
-import { isTaskDone, membership, progress, state } from '../state.js'
+import { isTaskDone, memberCount, membership, progress, state } from '../state.js'
 import { crumb, html, icon, paragraphs, pluralize, progressBar, statusBadge } from '../ui.js'
-import { hubPage } from './layout.js'
+import { hubPage, pageTop, viewSwitch } from './layout.js'
 
 export function streamView(id) {
   const stream = findStream(id)
@@ -25,7 +26,7 @@ export function streamView(id) {
   }
 
   return hubPage(html`
-    ${crumb(href.home, 'Your hub')}
+    ${pageTop(href.home, 'Your hub', isStart ? '' : viewSwitch(stream, 'volunteer'))}
     <div class="page-head" data-testid="stream-${stream.id}">
       <p class="eyebrow">${isStart ? 'Your roadmap' : 'Stream'}</p>
       <h1>${stream.title} ${isStart ? '' : statusBadge(status)}</h1>
@@ -40,7 +41,7 @@ export function streamView(id) {
 export function streamMeta(stream) {
   return html`<ul class="meta-list">
     <li>${icon('user')} Led by ${stream.lead}</li>
-    <li>${icon('users')} ${pluralize(stream.members, 'volunteer')}</li>
+    <li>${icon('users')} ${pluralize(memberCount(stream), 'volunteer')}</li>
     <li>${icon('clock')} ${stream.commitment}</li>
     <li>${icon('pin')} ${stream.where}</li>
   </ul>`
@@ -109,10 +110,13 @@ function preview(stream) {
   </section>`
 }
 
-// How to join: the lead's own text on what they expect from applicants (Spec 7.1).
+// How to join: the lead's own text on what they expect from applicants (Spec 7.1). After a rejection (in the lead
+// view) you can apply again.
 export function joinBox(item) {
+  const rejected = state.applications[item.id]?.status === 'rejected'
   return html`<section class="join-box" data-testid="join-box">
     <h2 class="block-title">How to join</h2>
+    ${rejected ? html`<p class="rejected-note" data-testid="rejected-note">${firstName(item.lead)} didn’t accept your last application. You can apply again.</p>` : ''}
     <blockquote class="expectations">
       <p>${item.expectations}</p>
       <footer>${item.lead}, ${item.kind === 'group' ? 'group lead' : 'stream lead'}</footer>

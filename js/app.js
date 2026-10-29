@@ -8,45 +8,23 @@ import {
   apply,
   completeOnboarding,
   progress,
-  restart,
   sendLeadApplication,
   setClaim,
   setDone,
   state,
   subscribe,
 } from './state.js'
-import { esc } from './ui.js'
+import { dropOldToast, toast } from './ui.js'
 import { applyView, leadView } from './views/apply.js'
 import { emailView } from './views/email.js'
 import { groupView } from './views/group.js'
 import { homeView } from './views/home.js'
+import { manageActions, manageForms, manageView } from './views/manage.js'
 import { onboardingView } from './views/onboarding.js'
 import { notFound, streamView, taskView } from './views/stream.js'
 
 const app = document.getElementById('app')
 let lastPath = null
-
-// ---- Toast ----
-
-const toastEl = document.createElement('div')
-toastEl.className = 'toast'
-toastEl.setAttribute('role', 'status')
-toastEl.dataset.testid = 'toast'
-document.body.append(toastEl)
-let toastTimer
-let toastShownAt = 0
-
-export function toast(message) {
-  toastEl.innerHTML = esc(message)
-  toastEl.classList.add('toast-show')
-  toastShownAt = Date.now()
-  clearTimeout(toastTimer)
-  toastTimer = setTimeout(hideToast, 4000)
-}
-
-function hideToast() {
-  toastEl.classList.remove('toast-show')
-}
 
 function view(route) {
   switch (route.name) {
@@ -66,6 +44,8 @@ function view(route) {
       return applyView(route.id)
     case 'lead':
       return leadView(route.kind)
+    case 'manage':
+      return manageView(route.id)
     default:
       return notFound()
   }
@@ -82,7 +62,7 @@ function render() {
   if (path !== lastPath) {
     window.scrollTo(0, 0)
     lastPath = path
-    if (Date.now() - toastShownAt > 250) hideToast() // a new page drops old toasts, not the one its own click just raised
+    dropOldToast()
   }
 }
 
@@ -92,10 +72,8 @@ function render() {
 
 const actions = {
   restart() {
-    restart()
-    lastPath = null
-    if (location.hash === href.email) render()
-    else navigate(href.email)
+    // A fresh load with ?reset=1 (state.js): it also drops the lead view's in-page edits of the mock content.
+    location.replace(`${location.pathname}?reset=1${href.email}`)
   },
   mock({ msg }) {
     toast(`Not part of the prototype. ${msg}`)
@@ -135,6 +113,7 @@ const actions = {
   unclaim({ key }) {
     setClaim(key, null)
   },
+  ...manageActions, // the lead view's
 }
 
 document.addEventListener('click', (event) => {
@@ -160,6 +139,7 @@ const forms = {
     sendLeadApplication(kind, Object.fromEntries(data))
     window.scrollTo(0, 0)
   },
+  ...manageForms, // the lead view's
 }
 
 document.addEventListener('submit', (event) => {

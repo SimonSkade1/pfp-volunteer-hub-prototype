@@ -1,7 +1,7 @@
 // Mock content: the demo volunteer, the welcome email, the streams, the local groups and the two lead forms.
 // All people, numbers and dates are made up; the links with an `href` are real public pages.
-// Views read these objects live on every render, so in-page edits (the lead view's mock editing) can change
-// them directly. Nothing here is persisted: the volunteer's own progress lives in state.js.
+// Views read these objects live on every render, so the lead view's mock edits and decisions change them in place
+// (until the page is reloaded). Nothing here is persisted: the volunteer's own progress lives in state.js.
 
 export const volunteer = {
   name: 'Jordan Miller',
@@ -39,6 +39,8 @@ export const FAR_MI = 100
 // A stream's tasks are an individual pipeline: the same steps for everyone, each volunteer marks their own progress.
 // A task's `action` is one of {href} (real page), {mock} (not part of the prototype), {copy} (text to copy), {route}.
 // A resource without `href` is mock.
+// For the lead view (Spec 21): `members` (everyone in the stream: `steps` = how many of its steps, from the first,
+// they did; see below the list) and `applications` (as in groups, see there).
 export const streams = [
   {
     id: 'getting-started',
@@ -130,7 +132,6 @@ export const streams = [
     title: 'Town halls',
     tagline: 'Ask your representatives, in public, where they stand on superintelligence.',
     lead: 'Dana Whitfield',
-    members: 23,
     commitment: 'About 4 hours a month',
     where: 'In person, near you',
     discord: '#town-halls',
@@ -199,6 +200,51 @@ export const streams = [
       { title: 'Question bank', type: 'Doc', note: 'Tested questions for House members, senators and candidates.' },
       { title: 'One-page handout for staff', type: 'PDF', note: 'What we ask for and why, to leave with the office.' },
     ],
+    members: [
+      { name: 'Alicia Ramos', steps: 0 }, { name: 'Hannah Weiss', steps: 1 }, { name: 'Olivia Grant', steps: 2 },
+      { name: 'Wendy Carter', steps: 4 }, { name: 'Brian Kelly', steps: 0 }, { name: 'Isaac Thompson', steps: 1 },
+      { name: 'Tanya Price', steps: 3 }, { name: 'Grace Adeyemi', steps: 0 }, { name: 'Paul Jacobs', steps: 2 },
+      { name: 'Aaron Fischer', steps: 4 }, { name: 'Luis Herrera', steps: 1 }, { name: 'Frank Russo', steps: 0 },
+      { name: 'Rosa Delgado', steps: 2 }, { name: 'Megan O’Brien', steps: 1 }, { name: 'Emily Chen', steps: 0 },
+      { name: 'Victor Huang', steps: 3 }, { name: 'Beth Sullivan', steps: 4 }, { name: 'Darnell Moore', steps: 0 },
+      { name: 'Noah Schmidt', steps: 1 }, { name: 'Steve Larson', steps: 2 }, { name: 'Sofia Castillo', steps: 0 },
+      { name: 'Janet Morales', steps: 1 }, { name: 'Carlos Vega', steps: 4 },
+    ],
+    applications: [
+      {
+        id: 'maria',
+        name: 'Maria Gonzalez',
+        place: 'Mesa, AZ',
+        when: '2 days ago',
+        text: 'I’m signed up for the workshop on Nov 7. My congressman holds a town hall in Mesa on Nov 14, and I want to ask him where he stands on a treaty.',
+        about: 'Retired middle school teacher and grandmother of four. My grandkids use AI for everything, and nobody seems to be in charge of where it’s going.',
+        screen: 'accept',
+        reasons: ['Signed up for the Nov 7 workshop, as you ask.', 'Has already found a town hall: Mesa, Nov 14.'],
+        status: 'pending',
+      },
+      {
+        id: 'kevin',
+        name: 'Kevin Doyle',
+        place: 'Columbus, OH',
+        when: 'Yesterday',
+        text: 'I work nights, so I can’t make either workshop. But I’ve spoken up at plenty of town halls as a union steward, so I know how they run.',
+        about: 'Union steward at a warehouse. I worry about what happens when AI can do every job, including building the next AI.',
+        screen: 'review',
+        reasons: ['Can’t attend a workshop, which you ask for.', 'Has spoken at town halls before. The workshop recording might be enough.'],
+        status: 'pending',
+      },
+      {
+        id: 'signals',
+        name: 'AI Profit Signals',
+        place: null,
+        when: '3 hours ago',
+        text: 'Make $5,000 a week with our AI trading bot!!! Limited spots, join now at ai-profit-signals.biz',
+        about: '',
+        screen: 'spam',
+        reasons: ['Advertises a trading bot and links to it.', 'Says nothing about town halls, and the profile is empty.'],
+        status: 'pending',
+      },
+    ],
   },
   {
     id: 'op-eds',
@@ -206,7 +252,6 @@ export const streams = [
     title: 'Op-eds and letters',
     tagline: 'Write for your local paper. Your neighbors read it, and so do your representatives’ staff.',
     lead: 'Sam Okafor',
-    members: 15,
     commitment: 'A few hours, once',
     where: 'From home',
     discord: '#op-eds',
@@ -261,6 +306,37 @@ export const streams = [
       { title: 'Published pieces', type: 'List', note: 'Twelve letters and op-eds by our volunteers.' },
       { title: 'Submission pages of US papers', type: 'Sheet', note: 'Word limits and links for 200+ papers.' },
     ],
+    members: [
+      { name: 'Natalie Ross', steps: 0 }, { name: 'Robert Chang', steps: 1 }, { name: 'Ethan Cole', steps: 2 },
+      { name: 'Claire Dubois', steps: 3 }, { name: 'James Whitaker', steps: 0 }, { name: 'Lauren Mitchell', steps: 1 },
+      { name: 'Fatima Ali', steps: 0 }, { name: 'Monica Reyes', steps: 2 }, { name: 'Andre Washington', steps: 3 },
+      { name: 'Kyle Bennett', steps: 0 }, { name: 'Omar Siddiqui', steps: 1 }, { name: 'Harold Simmons', steps: 2 },
+      { name: 'Diane Foster', steps: 0 }, { name: 'Peggy Walsh', steps: 1 }, { name: 'Susan Ward', steps: 3 },
+    ],
+    applications: [
+      {
+        id: 'helen',
+        name: 'Helen Park',
+        place: 'Portland, OR',
+        when: '3 days ago',
+        text: 'The Oregonian, or the Portland Tribune if that’s too big. I’m an ER nurse: every new drug is tested for years before patients get it, and AI companies release whatever they build.',
+        about: 'ER nurse in Portland. I read If Anyone Builds It, Everyone Dies over the summer and haven’t stopped thinking about it.',
+        screen: 'accept',
+        reasons: ['Names her paper and her angle, as you ask.', 'A strong personal angle: a nurse on safety testing.'],
+        status: 'pending',
+      },
+      {
+        id: 'rick',
+        name: 'Rick Becker',
+        place: 'Plano, TX',
+        when: 'Yesterday',
+        text: 'The Dallas Morning News. I want to write about AI taking our jobs and why we should tax the robots.',
+        about: 'Small business owner, two kids. AI is going to wipe out half the jobs in my town.',
+        screen: 'review',
+        reasons: ['Names his paper, as you ask.', 'His angle is jobs and a robot tax, not superintelligence and a treaty: he may need steering.'],
+        status: 'pending',
+      },
+    ],
   },
   {
     id: 'tabling',
@@ -268,7 +344,6 @@ export const streams = [
     title: 'Tabling',
     tagline: 'Set up a table in your town and sign up the people who already worry about AI.',
     lead: 'Ruth Novak',
-    members: 7,
     commitment: 'One 2-hour table a month',
     where: 'In person, near you',
     discord: '#tabling',
@@ -330,11 +405,48 @@ export const streams = [
       { title: 'Answers to common questions', type: 'Doc', note: 'What to say when people ask “isn’t this just hype?” and more.' },
       { title: 'Printable sign-up sheet', type: 'PDF', note: 'In case you run out.' },
     ],
+    members: [
+      { name: 'Molly Henderson', steps: 0 }, { name: 'Derek Olson', steps: 1 }, { name: 'Raj Malhotra', steps: 2 },
+      { name: 'Javier Ortega', steps: 0 }, { name: 'Teresa Kim', steps: 4 }, { name: 'Amy Lindgren', steps: 1 },
+      { name: 'Keisha Robinson', steps: 0 },
+    ],
+    applications: [
+      {
+        id: 'ahmed',
+        name: 'Ahmed Hassan',
+        place: 'Minneapolis, MN',
+        when: '2 days ago',
+        text: 'At the student union of the University of Minnesota, the week of Nov 16. Two friends from my lab want to help.',
+        about: 'PhD student in chemistry. I signed the Statement on Superintelligence and want to do more than sign things.',
+        screen: 'accept',
+        reasons: ['Says where and when, as you ask.', 'Brings two friends to help.'],
+        status: 'pending',
+      },
+      {
+        id: 'jess',
+        name: 'Jess Turner',
+        place: 'Boise, ID',
+        when: 'Today',
+        text: 'Sure, wherever you need me!',
+        about: 'Mom of three. Saw your post on Facebook.',
+        screen: 'review',
+        reasons: ['Doesn’t say where or when, which you ask for.', 'Sounds keen, but her profile is short too.'],
+        status: 'pending',
+      },
+    ],
   },
 ]
 
+// A stream member's progress as the ids of the steps they did (`done`, from their first `steps`), like your own
+// progress in state.js: so it stays right when the lead view adds, moves or removes steps.
+for (const stream of streams)
+  for (const member of stream.members || []) member.done = stream.tasks.slice(0, member.steps).map((task) => task.id)
+
 // A local group's project is a team project: people claim different tasks. Members are in it by default.
 // A team task's `owner` is the member who claimed it (or null); the volunteer's own claims live in state.js.
+// `applications` (streams have them too): mock applications for the lead view (Spec 21), each with Claude's pre-screen
+// (Spec 14): `screen` 'accept' | 'review' | 'spam' and its `reasons`. `status` 'pending' | 'accepted' | 'rejected'
+// changes in place when the lead decides.
 export const groups = [
   {
     id: 'detroit',
@@ -371,6 +483,30 @@ export const groups = [
           { id: 'door', title: 'Run the sign-up table at the door', note: 'Greet guests, collect emails and hand out postcards.', owner: null, done: false },
           { id: 'pizza', title: 'Order pizza and drinks', note: 'For 40. Keep the receipt: national pays up to $150.', owner: 'Dave Kowalski', done: false },
         ],
+      },
+    ],
+    applications: [
+      {
+        id: 'nadia',
+        name: 'Nadia Haddad',
+        place: 'Dearborn, MI',
+        when: 'Yesterday',
+        text: 'I’m a pharmacist in Dearborn and can make most Thursday meetings, in person too. I’d love to help with the community evening.',
+        about: 'Pharmacist and mom. I want our representatives to take this seriously before it’s too late.',
+        screen: 'accept',
+        reasons: ['Lives in Dearborn, in your area.', 'Can make your Thursday meetings, as you ask.'],
+        status: 'pending',
+      },
+      {
+        id: 'greg',
+        name: 'Greg Wilson',
+        place: 'Toledo, OH',
+        when: '2 days ago',
+        text: 'I live in Toledo, about an hour from Royal Oak. Could I join on Zoom only? There’s no group in Ohio yet.',
+        about: 'Retired engineer and Air Force veteran. AI is a national security problem, and I want to help.',
+        screen: 'review',
+        reasons: ['Lives in Toledo, Ohio, about 70 miles away: outside your area.', 'Asks to join on Zoom only. He might be a good fit to start a group in Toledo.'],
+        status: 'pending',
       },
     ],
   },

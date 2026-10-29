@@ -1,5 +1,5 @@
-// HTML helpers. Views are functions that return html`…`: interpolated values are escaped unless they are
-// html`…` / raw() results themselves, arrays are joined, and null / undefined / false / true render nothing.
+// HTML helpers and the toast. Views are functions that return html`…`: interpolated values are escaped unless they
+// are html`…` / raw() results themselves, arrays are joined, and null / undefined / false / true render nothing.
 
 class Raw {
   constructor(s) {
@@ -44,6 +44,10 @@ const ICONS = {
   restart: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
   copy: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
   user: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+  up: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+  down: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  sparkles: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
 }
 
 export function icon(name) {
@@ -71,4 +75,27 @@ export function progressBar(p, inverse = true) {
       <span class="progress-fill" style="width: ${pct}%"></span>
     </div>
     <p class="progress-text">${p.done} of ${p.total} done</p>`
+}
+
+// ---- Toast: a short message at the bottom of the screen, for 4 seconds ----
+
+const toastEl = document.createElement('div')
+toastEl.className = 'toast'
+toastEl.setAttribute('role', 'status')
+toastEl.dataset.testid = 'toast'
+document.body.append(toastEl)
+let toastTimer
+let toastShownAt = 0
+
+export function toast(message) {
+  toastEl.innerHTML = esc(message)
+  toastEl.classList.add('toast-show')
+  toastShownAt = Date.now()
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => toastEl.classList.remove('toast-show'), 4000)
+}
+
+// On a new page: drop an old toast, but not the one the page's own click just raised.
+export function dropOldToast() {
+  if (Date.now() - toastShownAt > 250) toastEl.classList.remove('toast-show')
 }
