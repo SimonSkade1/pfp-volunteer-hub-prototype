@@ -82,11 +82,13 @@ function render() {
   if (path !== lastPath) {
     window.scrollTo(0, 0)
     lastPath = path
-    if (Date.now() - toastShownAt > 600) hideToast()
+    if (Date.now() - toastShownAt > 250) hideToast() // a new page drops old toasts, not the one its own click just raised
   }
 }
 
 // ---- Clicks: <… data-action="name" data-…> ----
+// Where an action or form moves to another page, it navigates first: the state change then renders the destination
+// directly (location.hash changes at once, the hashchange render follows), without a flash of the old page.
 
 const actions = {
   restart() {

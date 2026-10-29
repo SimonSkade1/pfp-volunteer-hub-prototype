@@ -28,7 +28,9 @@ python3 -m http.server 8765        # then open http://127.0.0.1:8765/
 ```
 
 Every push to `main` deploys: GitHub Pages serves the branch's root as it is (`.nojekyll`), about a minute after the
-push. Pages caches files for up to 10 minutes; a fresh browser context (or a hard reload) sees the new version.
+push; `gh api repos/SimonSkade1/pfp-volunteer-hub-prototype/pages/builds/latest --jq '.status + " " + .commit'` says
+when (`built`, `building` or `errored`). Pages caches files for up to 10 minutes; a fresh browser context (or a hard
+reload) sees the new version.
 
 ## Code layout
 
