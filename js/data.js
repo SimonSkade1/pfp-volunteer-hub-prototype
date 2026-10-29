@@ -1,5 +1,6 @@
-// Mock content: the demo volunteer, the welcome email, the streams, the local groups and the two lead forms.
-// All people, numbers and dates are made up; the links with an `href` are real public pages.
+// Mock content: the demo volunteer, the welcome email, the streams, the local groups, the vacancies and the leads'
+// profiles. All people, numbers and dates are made up; the links with an `href` are real public pages, and so are the
+// links written [label](https://…) inside a text (ui.js `richText`).
 // Views read these objects live on every render, so the lead view's mock edits and decisions change them in place
 // (until the page is reloaded). Nothing here is persisted: the volunteer's own progress lives in state.js.
 
@@ -24,18 +25,23 @@ export const welcomeEmail = {
   button: 'Open your volunteer hub',
   buttonNote: 'The button signs you in; no password needed.',
   after: [
-    'In the hub you’ll find your first action (it takes two minutes), local groups near you, and ways to help from anywhere, like town halls and op-eds. You also join our Discord from there.',
+    'In the hub, pick a local group near you or one of our nationwide efforts to join, like town halls or op-eds. Your first action takes two minutes, and you can take it right away. Once you’re accepted, you join our Discord from there too.',
     'No AI expertise needed. Glad to have you with us!',
   ],
   signature: 'The People for a Pause team',
   ps: 'P.S. Just want to stay informed? That’s what the newsletter is for; you don’t need to do anything else.',
 }
 
-// Local groups within NEAR_MI count as "near you", those within FAR_MI as "not too far away".
-export const NEAR_MI = 25
-export const FAR_MI = 100
+// The main page lists the local groups within RADIUS_MI of you, nearest first (Spec 6.2, 17.2).
+export const RADIUS_MI = 100
 
-// kind 'start': Getting started, which everyone is in. kind 'stream': a nationwide pipeline that needs an application.
+// The onboarding's hours choice (Spec 5); your profile shows it.
+export const hoursOptions = ['Under 1 hour', '1–2 hours', '2–5 hours', '5–10 hours', 'Over 10 hours']
+
+export const LUMA = 'https://luma.com/pfp' // PFP's events calendar, linked on peopleforapause.org
+
+// kind 'start': Getting started, joined in one click, no application. kind 'stream': a nationwide pipeline that needs
+// an application.
 // A stream's tasks are an individual pipeline: the same steps for everyone, each volunteer marks their own progress.
 // A task's `action` is one of {href} (real page), {mock} (not part of the prototype), {copy} (text to copy), {route}.
 // A resource without `href` is mock.
@@ -48,7 +54,7 @@ export const streams = [
     title: 'Getting started',
     tagline: 'Your first actions, and the basics on AI risk.',
     description: [
-      'Everyone starts here. Each step takes a few minutes, so there’s always something you can do right now, also while you wait to hear back on an application.',
+      'Actions you can take on your own, right now. Each takes a few minutes, so there’s always something to do, also while an application waits.',
     ],
     tasks: [
       {
@@ -79,19 +85,6 @@ export const streams = [
         ],
       },
       {
-        id: 'join',
-        title: 'Join a local group or a stream',
-        time: '10 min',
-        summary: 'This is where most of our work happens.',
-        steps: [
-          'On the main page of your hub, look at the local groups near you and at our current streams.',
-          'Pick the one that fits you best and apply. Each one says what it expects from you.',
-          'While you wait to hear back, go on with the next step here.',
-        ],
-        action: { label: 'See groups and streams', route: '#/hub' },
-        doneWhen: 'applied', // done as soon as you have applied to any group or stream
-      },
-      {
         id: 'invite',
         title: 'Invite two friends',
         time: '5 min',
@@ -103,7 +96,7 @@ export const streams = [
         action: { label: 'Copy the signup link', copy: 'https://peopleforapause.org/get-involved/' },
       },
     ],
-    doneNote: 'That’s the basics. Your local group or stream has the next steps.',
+    doneNote: 'That’s the basics. Next: join a local group or a stream.',
     resourcesTitle: 'New to AI risk? Start here',
     resources: [
       {
@@ -140,7 +133,7 @@ export const streams = [
       'From November to January, members of Congress and the newly elected hold events back home before the new Congress starts. We want our question asked at as many of them as we can.',
     ],
     expectations:
-      'Attend one of our town hall workshops first (online, 90 minutes): how to find a town hall, what to ask, and how to handle the answer. The next ones are on Sat Nov 7, 1 pm ET and Tue Nov 10, 7 pm ET, on our Luma calendar. In your application, tell me which workshop you attended or will attend.',
+      `Attend one of our town hall workshops first (online, 90 minutes): how to find a town hall, what to ask, and how to handle the answer. The next ones are on Sat Nov 7, 1 pm ET and Tue Nov 10, 7 pm ET, on [our Luma calendar](${LUMA}). In your application, tell me which workshop you attended or will attend.`,
     applyPlaceholder: 'e.g. I’m signed up for the workshop on Nov 7, and a friend wants to come along to town halls.',
     commitmentText: 'I can commit to this: about 4 hours a month until January.',
     tasks: [
@@ -337,103 +330,6 @@ export const streams = [
       },
     ],
   },
-  {
-    id: 'tabling',
-    kind: 'stream',
-    title: 'Tabling',
-    tagline: 'Set up a table in your town and sign up the people who already worry about AI.',
-    lead: 'Ruth Novak',
-    commitment: 'One 2-hour table a month',
-    where: 'In person, near you',
-    discord: '#tabling',
-    description: [
-      'A table at a farmers market, a campus or a library is the easiest way to meet the people in your area who worry about AI. Most of them have never heard that they can do something about it.',
-      'Do it alone or with a friend: we mail you a free kit and a short script. Everyone who signs up at your table hears about the local group near them, or helps start one.',
-    ],
-    expectations: 'Tell me where you’d like to table and roughly when you could do your first one. We mail the kit within a week.',
-    applyPlaceholder: 'e.g. The Saturday farmers market in Ann Arbor, some time in November.',
-    commitmentText: 'I can commit to this: one 2-hour table in the next month.',
-    tasks: [
-      {
-        id: 'kit',
-        title: 'Order your free tabling kit',
-        time: '5 min',
-        summary: 'A banner, sign-up sheets, postcards and flyers, mailed to you.',
-        steps: [
-          'Fill in your address in the kit form.',
-          'We mail you a table banner, sign-up sheets, 50 postcards to Congress and flyers. They arrive within a week.',
-        ],
-        action: { label: 'Open the kit form', mock: 'This would open the form for the tabling kit.' },
-      },
-      {
-        id: 'spot',
-        title: 'Pick a spot and a date',
-        time: '30 min',
-        summary: 'Anywhere people stroll and have a minute.',
-        steps: [
-          'Good spots: farmers markets, campuses, libraries, community events.',
-          'Ask the organizer or the manager. Markets often have a free table for nonprofits.',
-          'Post your spot and date in #tabling, so a volunteer nearby can join you.',
-        ],
-      },
-      {
-        id: 'run',
-        title: 'Run your table',
-        time: '2 hours',
-        summary: 'Ask one question, then listen.',
-        steps: [
-          'Use the script. Open with one question: “Have you heard that AI companies are racing to build superintelligence?”',
-          'Ask everyone who’s interested to sign up and to write a postcard to their representative right at the table.',
-          'Take a photo of your table for #tabling.',
-        ],
-      },
-      {
-        id: 'send',
-        title: 'Send in your sign-ups',
-        time: '15 min',
-        summary: 'So every sign-up hears from us within a week.',
-        steps: [
-          'Photograph the sign-up sheets and post them in #tabling.',
-          'Mail the postcards in the prepaid envelope from the kit. We deliver them to the offices in Washington.',
-        ],
-      },
-    ],
-    doneNote: 'Great work! Book your next table: the second one is always easier.',
-    resources: [
-      { title: 'Tabling guide and script', type: 'Guide', note: 'Setup, the opening question and how to close.' },
-      { title: 'Answers to common questions', type: 'Doc', note: 'What to say when people ask “isn’t this just hype?” and more.' },
-      { title: 'Printable sign-up sheet', type: 'PDF', note: 'In case you run out.' },
-    ],
-    members: [
-      { name: 'Molly Henderson', steps: 0 }, { name: 'Derek Olson', steps: 1 }, { name: 'Raj Malhotra', steps: 2 },
-      { name: 'Javier Ortega', steps: 0 }, { name: 'Teresa Kim', steps: 4 }, { name: 'Amy Lindgren', steps: 1 },
-      { name: 'Keisha Robinson', steps: 0 },
-    ],
-    applications: [
-      {
-        id: 'ahmed',
-        name: 'Ahmed Hassan',
-        place: 'Minneapolis, MN',
-        when: '2 days ago',
-        text: 'At the student union of the University of Minnesota, the week of Nov 16. Two friends from my lab want to help.',
-        about: 'PhD student in chemistry. I signed the Statement on Superintelligence and want to do more than sign things.',
-        screen: 'accept',
-        reasons: ['Says where and when, as you ask.', 'Brings two friends to help.'],
-        status: 'pending',
-      },
-      {
-        id: 'jess',
-        name: 'Jess Turner',
-        place: 'Boise, ID',
-        when: 'Today',
-        text: 'Sure, wherever you need me!',
-        about: 'Mom of three. Saw your post on Facebook.',
-        screen: 'review',
-        reasons: ['Doesn’t say where or when, which you ask for.', 'Sounds keen, but her profile is short too.'],
-        status: 'pending',
-      },
-    ],
-  },
 ]
 
 // A stream member's progress as the ids of the steps they did (`done`, from their first `steps`), like your own
@@ -511,40 +407,98 @@ export const groups = [
   },
 ]
 
-export const leadForms = {
-  group: {
-    title: 'Apply to lead a local group',
+// Vacancies (Spec 6.4, 8, 17.4): roles we need volunteers for nationally, plus starting a local group. Each has its
+// page; you apply on the shared apply page with one field, why you'd be a good fit; no acceptance in the demo.
+export const vacancies = [
+  {
+    id: 'social-media',
+    kind: 'vacancy',
+    title: 'Social media',
+    tagline: 'Run our accounts on X, Instagram and TikTok.',
+    commitment: 'About 5 hours a week',
+    where: 'From home',
+    description: [
+      'Post our events, share what our volunteers achieve, and answer questions in the comments. You plan the posts with our organizing director and get photos and clips from the local groups.',
+      'A good fit if you already post a lot and know what works on at least one platform.',
+    ],
+    applyPlaceholder: 'e.g. I run the Instagram account of my church: 2,000 followers, a post every week.',
+  },
+  {
+    id: 'media',
+    kind: 'vacancy',
+    title: 'Media outreach',
+    tagline: 'Get our message into newspapers, radio and TV.',
+    commitment: '3–5 hours a week',
+    where: 'From home',
+    description: [
+      'Pitch stories to journalists, write press releases for our events, and prepare our volunteers for interviews. You keep the list of reporters who cover AI, nationally and near our local groups.',
+      'A good fit if you’ve worked in journalism, PR or communications.',
+    ],
+    applyPlaceholder: 'e.g. Ten years as a reporter for the Detroit Free Press, now in PR.',
+  },
+  {
+    id: 'onboarding',
+    kind: 'vacancy',
+    title: 'Volunteer onboarding',
+    tagline: 'Welcome new volunteers and help each one find their place.',
+    commitment: '3–5 hours a week',
+    where: 'From home',
+    description: [
+      'Call new volunteers for 15 minutes, answer their questions on Discord, and help each one find a local group or stream that fits. A month later, check in on how it’s going.',
+      'A good fit if you like talking to people and want to see our movement grow.',
+    ],
+    applyPlaceholder: 'e.g. I welcome new members at my running club and still know most of them by name.',
+  },
+  {
+    id: 'start-group',
+    kind: 'vacancy',
+    title: 'Start a local group',
+    tagline: 'Bring People for a Pause to your town.',
+    commitment: '5–10 hours a week, for at least six months',
+    where: 'In person, where you live',
     warning: [
       'Leading a local group is a huge amount of work: expect 5–10 hours a week for at least six months. You recruit members, run the meetings and a public event every month, and meet with your representatives’ offices.',
       'You won’t do it alone: group leads get support from our organizing director, regular calls with the other leads, resources and media support. We interview every applicant.',
     ],
-    placeLabel: 'Where would your group be?',
-    whyLabel: 'Why do you want to lead a group, and what makes you a good fit?',
-    whoLabel: 'Who could you start with?',
-    whoHint: 'Friends, coworkers or communities you’re part of who might join.',
-    sent: 'Application sent. We’ll email you within a week to set up an interview.',
-  },
-  stream: {
-    title: 'Apply to lead a stream',
-    intro: [
-      'A stream is a nationwide effort that anyone can join, like town halls or tabling. Leading one means designing its steps, accepting volunteers and keeping them going: plan on at least 5 hours a week.',
-      'Pick one of our ideas or pitch your own. We interview every applicant and work out the details with you.',
+    description: [
+      'Most groups start with three to five people: friends, coworkers or neighbors. In your application, tell us where your group would be and who you could start with.',
     ],
-    ideas: [
-      { id: 'screenings', title: 'Movie screenings', note: 'Volunteers host screenings of AI documentaries and lead a discussion afterwards.' },
-      { id: 'media', title: 'Local media', note: 'Get our message onto local radio, TV and podcasts.' },
-      { id: 'congress', title: 'Meetings with Congress', note: 'Volunteers meet their members of Congress in their district offices.' },
-      { id: 'postcards', title: 'Postcards to Congress', note: 'Postcard-writing evenings; we deliver the cards by hand.' },
-      { id: 'influencers', title: 'Influencer outreach', note: 'Reach creators who talk to audiences we don’t reach yet.' },
-      { id: 'own', title: 'My own idea', note: 'Describe it in your pitch.' },
-    ],
-    pitchLabel: 'Your pitch: what would volunteers do, and how does it help get to a pause?',
-    aboutLabel: 'Why would you be a good fit?',
-    sent: 'Application sent. We’ll email you within a week to set up an interview.',
+    applyPlaceholder: 'e.g. Ann Arbor. I organized a neighborhood association for five years, and three friends want to join.',
   },
-}
+]
 
-export const hoursOptions = ['Less than 5 hours a week', '5–10 hours a week', 'More than 10 hours a week']
+export const vacancySent = 'We’ll email you within a week to set up a call.'
+
+// The leads' profiles (Spec 5.1): a lead's name on their stream's or group's page opens theirs.
+export const leads = [
+  {
+    id: 'dana-whitfield',
+    name: 'Dana Whitfield',
+    place: 'Harrisburg, PA',
+    about: [
+      'I spent eight years on the staff of a state senator, so I’ve sat on the other side of a lot of town halls. One good question from a constituent changes what a politician says next.',
+      'I asked my first question about superintelligence at a town hall in 2025, and I’ve helped about forty volunteers ask theirs since.',
+    ],
+  },
+  {
+    id: 'sam-okafor',
+    name: 'Sam Okafor',
+    place: 'Raleigh, NC',
+    about: [
+      'High school English teacher and freelance writer. My letters and op-eds have run in the News & Observer and the Charlotte Observer.',
+      'I read every draft in #op-eds and reply within two days.',
+    ],
+  },
+  {
+    id: 'maya-johnson',
+    name: 'Maya Johnson',
+    place: 'Royal Oak, MI',
+    about: [
+      'Physical therapist and mom of two. I started the Detroit area group in spring 2026 with three friends from church; now we’re nine.',
+      'I want our representatives to hear about superintelligence from their own neighbors, not just from the AI companies.',
+    ],
+  },
+]
 
 export function findStream(id) {
   return streams.find((s) => s.id === id)
@@ -554,9 +508,18 @@ export function findGroup(id) {
   return groups.find((g) => g.id === id)
 }
 
-// A stream or a group, by id.
-export function findItem(id) {
-  return findStream(id) || findGroup(id)
+export function findVacancy(id) {
+  return vacancies.find((v) => v.id === id)
 }
+
+// A stream, a group or a vacancy, by id: the things you can join or apply to.
+export function findItem(id) {
+  return findStream(id) || findGroup(id) || findVacancy(id)
+}
+
+export const findLead = (id) => leads.find((lead) => lead.id === id)
+export const leadOf = (item) => leads.find((lead) => lead.name === item.lead)
+// What a lead leads: their streams and groups.
+export const ledBy = (lead) => [...streams, ...groups].filter((item) => item.lead === lead.name)
 
 export const firstName = (name) => name.split(' ')[0]

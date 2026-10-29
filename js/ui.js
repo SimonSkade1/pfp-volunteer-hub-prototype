@@ -58,24 +58,44 @@ export function icon(name) {
 
 export const paragraphs = (texts, cls = 'prose') => html`<div class="${cls}">${texts.map((t) => html`<p>${t}</p>`)}</div>`
 
+// A text that may hold links written [label](https://…), e.g. a lead's expectations: escaped, with the links real
+// (new tab, external-link icon). Plain text stays plain, so an editor can show and save the text as it is.
+export function richText(text) {
+  const parts = String(text).split(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/) // text, label, url, text, label, url, …
+  let out = ''
+  for (let i = 0; i < parts.length; i += 3) {
+    out += esc(parts[i])
+    if (i + 2 < parts.length)
+      out += `<a href="${esc(parts[i + 2])}" target="_blank" rel="noopener">${esc(parts[i + 1])} ${icon('external')}</a>`
+  }
+  return raw(out)
+}
+
 export const crumb = (to, label) => html`<a class="crumb" href="${to}" data-testid="back">${icon('left')} ${label}</a>`
 
+// A stream's or group's membership (state.js); 'sent' is an application to a vacancy.
 export function statusBadge(status) {
   if (status === 'member') return html`<span class="badge badge-member">${icon('check')} Joined</span>`
   if (status === 'pending') return html`<span class="badge badge-pending">${icon('clock')} Pending</span>`
+  if (status === 'sent') return html`<span class="badge badge-pending">${icon('check')} Sent</span>`
   return ''
 }
 
 export const pluralize = (n, word, plural = `${word}s`) => `${n} ${n === 1 ? word : plural}`
 
-// inverse: white on the blue Getting started card.
-export function progressBar(p, inverse = true) {
+export function progressBar(p) {
   const pct = Math.round((100 * p.done) / p.total)
-  return html`<div class="progress ${inverse ? 'progress-inverse' : ''}" role="img" aria-label="${p.done} of ${p.total} done">
+  return html`<div class="progress" role="img" aria-label="${p.done} of ${p.total} done">
       <span class="progress-fill" style="width: ${pct}%"></span>
     </div>
     <p class="progress-text">${p.done} of ${p.total} done</p>`
 }
+
+export const initialsOf = (name) =>
+  name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
 
 // ---- Toast: a short message at the bottom of the screen, for 4 seconds ----
 

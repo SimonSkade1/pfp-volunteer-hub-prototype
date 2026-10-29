@@ -1,4 +1,10 @@
-/* Look: a loose cue from peopleforapause.org: its red, blue and ink, its two fonts, square corners, 2px ink borders. */
+/* Look: a loose cue from peopleforapause.org: its red, blue and ink, its two fonts, square corners, 2px ink borders.
+   Red and blue in balance within every screenful (Spec 23.1; check: scripts/color_balance.py):
+   - the sticky top bar carries both, in its ribbon;
+   - a page head pairs its navy title with a red eyebrow chip, and with the red call to action beside it;
+   - red marks what you can do (primary buttons, call-to-action links, a card's arrow, the next step), blue where you
+     are and what things are (titles, badges, tags, progress and done marks, icons, links, secondary buttons);
+   - avatars, section titles and body text are ink. */
 
 @font-face {
   font-family: 'Schibsted Grotesk';
@@ -132,8 +138,17 @@ select {
 /* ---- Top bar ---- */
 
 .topbar {
-  background: var(--red);
-  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--paper);
+}
+
+.topbar::after {
+  content: '';
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--red) 50%, var(--blue) 50%);
 }
 
 .topbar-inner {
@@ -159,34 +174,33 @@ select {
 }
 
 .dot {
-  color: var(--ink);
+  color: var(--red);
 }
 
 .brand-sub {
   padding-left: 12px;
-  border-left: 1px solid rgb(255 255 255 / 55%);
+  border-left: 1px solid var(--line-soft);
+  color: var(--blue);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
-}
-
-.me {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .avatar {
   display: grid;
+  flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  background: var(--blue);
+  width: 38px;
+  height: 38px;
+  background: var(--ink);
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
+  text-decoration: none;
+}
+
+.topbar .avatar:hover {
+  background: #3a3e46;
 }
 
 /* ---- Page ---- */
@@ -209,6 +223,7 @@ select {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 14px;
+  color: var(--blue);
   font-size: 44px;
   font-weight: 900;
   line-height: 1.05;
@@ -217,11 +232,20 @@ select {
 
 .eyebrow {
   margin-bottom: 8px;
-  color: var(--red);
+  color: var(--blue);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+/* A page head's eyebrow: a red chip above the navy title. */
+.page-head .eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  background: var(--red);
+  color: #fff;
 }
 
 .eyebrow .icon {
@@ -236,8 +260,10 @@ select {
   line-height: 1.45;
 }
 
+.link,
 .lead a {
-  color: var(--red-deep);
+  color: var(--blue);
+  font-weight: 600;
 }
 
 .crumb {
@@ -264,14 +290,40 @@ select {
   margin-top: 16px;
   padding: 0;
   list-style: none;
-  color: var(--muted);
+  color: var(--blue);
   font-size: 15px;
+  font-weight: 500;
 }
 
 .meta-list li {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.meta-list .icon,
+.card-meta .icon {
+  color: var(--blue);
+}
+
+/* The title and the call to action side by side (a phone: the button right below the title), so the navy title and
+   the red button stay in one screenful. */
+.head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+
+.head-row .btn {
+  flex: none;
+  min-width: 150px;
+}
+
+.page-head .pending-box,
+.page-head .rejected-note {
+  margin-top: 22px;
 }
 
 .prose {
@@ -304,12 +356,6 @@ select {
   line-height: 1.1;
 }
 
-.section-lead {
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 16px;
-}
-
 .subhead {
   margin: 22px 0 10px;
   font-size: 14px;
@@ -322,8 +368,27 @@ select {
   margin-top: 16px;
 }
 
-.section-lead + .grid {
+.section-title + .empty {
   margin-top: 16px;
+}
+
+.section-cta {
+  margin-top: 16px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--red);
+  font-size: 18px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.cta:hover {
+  color: var(--red-deep);
+  text-decoration: underline;
 }
 
 .grid {
@@ -363,7 +428,7 @@ select {
 }
 
 .card-kind {
-  color: var(--muted);
+  color: var(--red);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.07em;
@@ -379,6 +444,28 @@ select {
 
 .card-title a {
   text-decoration: none;
+}
+
+.card-title > .icon {
+  margin-left: 8px;
+  color: var(--red);
+  font-size: 0.85em;
+  vertical-align: -0.05em;
+}
+
+.card-tags {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border: 2px solid var(--blue);
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .stretched::after {
@@ -412,45 +499,6 @@ select {
   content: '· ';
 }
 
-.card-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 8px;
-}
-
-.over-stretched,
-.card-actions .btn {
-  position: relative;
-  z-index: 1;
-}
-
-.card-start {
-  border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
-}
-
-.card-start:has(.stretched:hover) {
-  box-shadow: 5px 5px 0 var(--ink);
-}
-
-.card-next {
-  margin-top: 4px;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.card-next-label {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  opacity: 0.8;
-}
 
 /* ---- Progress ---- */
 
@@ -465,14 +513,6 @@ select {
   height: 100%;
   background: var(--blue);
   transition: width 0.3s;
-}
-
-.progress-inverse {
-  background: rgb(255 255 255 / 25%);
-}
-
-.progress-inverse .progress-fill {
-  background: #fff;
 }
 
 .progress-text {
@@ -501,8 +541,10 @@ select {
 }
 
 .badge-member {
-  background: var(--blue);
-  color: #fff;
+  padding: 1px 8px;
+  border: 2px solid var(--blue);
+  background: #fff;
+  color: var(--blue);
 }
 
 .badge-pending {
@@ -543,22 +585,23 @@ select {
 
 .btn-secondary {
   background: #fff;
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-.btn-secondary:hover {
-  background: var(--paper-2);
-}
-
-.btn-inverse {
-  background: #fff;
-  border-color: #fff;
+  border-color: var(--blue);
   color: var(--blue);
 }
 
-.btn-inverse:hover {
+.btn-secondary:hover {
   background: var(--blue-tint);
+}
+
+/* A repeated action in a list (Claim on a task board): red, but light. */
+.btn-outline {
+  background: #fff;
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.btn-outline:hover {
+  background: #fbe9eb;
 }
 
 .btn-small {
@@ -599,45 +642,10 @@ select {
   background: var(--paper-2);
 }
 
-/* ---- Lead boxes on the main page ---- */
-
-.lead-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 24px;
-  margin-top: 16px;
-  padding: 18px 20px;
-  border-left: 6px solid var(--red);
-  background: var(--paper);
-}
-
-.lead-box-title {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.lead-box-text {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.lead-box .btn {
-  flex: none;
-}
-
 /* ---- Blocks on reading pages ---- */
 
 .block {
   margin-top: 36px;
-}
-
-.block-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
 }
 
 .block-title {
@@ -709,8 +717,7 @@ select {
 
 .step-done .step-mark {
   border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
+  color: var(--blue);
 }
 
 .step-done .step-title {
@@ -745,6 +752,22 @@ select {
   margin-top: 4px;
   font-family: var(--serif);
   font-size: 16px;
+}
+
+.step-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  background: var(--red);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.step-next:has(.stretched:hover) .step-cta {
+  background: var(--red-deep);
 }
 
 .step-later .step-mark {
@@ -797,10 +820,14 @@ select {
   background: var(--paper-2);
 }
 
+.resource > .icon {
+  color: var(--red);
+}
+
 .resource-type {
   flex: none;
   width: 70px;
-  color: var(--red);
+  color: var(--blue);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.07em;
@@ -837,6 +864,11 @@ select {
   font-size: 16px;
 }
 
+.discord-line > .icon,
+.info-cell > .icon {
+  color: var(--blue);
+}
+
 .discord-line > .icon {
   font-size: 22px;
 }
@@ -867,22 +899,23 @@ select {
   font-size: 22px;
 }
 
-/* How to join, pending */
-
-.join-box {
-  margin-top: 36px;
-  padding: 24px;
-  border: 2px solid var(--ink);
-  background: var(--paper);
-}
+/* Expectations (the apply page), pending */
 
 .expectations {
-  margin-bottom: 20px;
   padding: 4px 0 4px 18px;
-  border-left: 4px solid var(--red);
+  border-left: 4px solid var(--blue);
   font-family: var(--serif);
   font-size: 18px;
   line-height: 1.5;
+}
+
+.expectations a {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.block + .form {
+  margin-top: 24px;
 }
 
 .expectations footer {
@@ -905,9 +938,8 @@ select {
   font-size: 16px;
 }
 
-.pending-box a {
-  color: var(--red-deep);
-  font-weight: 600;
+.pending-box p + p {
+  margin-top: 6px;
 }
 
 .pending-title {
@@ -996,7 +1028,7 @@ select {
 }
 
 .links a {
-  color: var(--red-deep);
+  color: var(--blue);
   font-weight: 600;
 }
 
@@ -1011,7 +1043,7 @@ select {
 }
 
 .task-actions .muted a {
-  color: var(--red-deep);
+  color: var(--blue);
 }
 
 .done-line {
@@ -1029,6 +1061,10 @@ select {
 .board-summary {
   margin: 14px 0 10px;
   font-size: 15px;
+}
+
+.board-summary strong {
+  color: var(--red);
 }
 
 .board {
@@ -1060,8 +1096,7 @@ select {
 
 .board-task.is-done .board-check {
   border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
+  color: var(--blue);
 }
 
 .board-task.is-done .board-title {
@@ -1121,9 +1156,9 @@ select {
 }
 
 .person-you {
-  padding: 3px 9px;
-  background: var(--blue);
-  color: #fff;
+  padding: 1px 8px;
+  border: 2px solid var(--blue);
+  color: var(--blue);
 }
 
 .person-avatar {
@@ -1208,15 +1243,6 @@ legend.label {
   font-weight: 500;
 }
 
-.hint {
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.form .hint {
-  overflow-wrap: anywhere;
-}
-
 textarea,
 input:not([type]),
 input[type='url'],
@@ -1248,32 +1274,41 @@ textarea::placeholder {
 }
 
 .check input,
-.idea input {
+.choice input {
   flex: none;
   width: 20px;
   height: 20px;
-  margin: 1px 0 0;
-  accent-color: var(--red);
+  margin: 0;
+  accent-color: var(--blue);
 }
 
-.ideas {
-  display: grid;
+/* The onboarding's hours choice: one click */
+.choices {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.idea {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--line-soft);
-  font-size: 15px;
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 2px solid var(--line-soft);
+  background: #fff;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.idea:has(input:checked) {
-  border-color: var(--ink);
-  box-shadow: inset 4px 0 0 var(--red);
+.choice:hover {
+  border-color: var(--blue);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--blue);
+  background: var(--blue-tint);
+  color: var(--blue);
 }
 
 .form-actions {
@@ -1285,9 +1320,10 @@ textarea::placeholder {
 
 .warning {
   max-width: 680px;
+  margin-bottom: 24px;
   padding: 18px 22px;
-  border-left: 6px solid var(--red);
-  background: #fbe9eb;
+  border-left: 6px solid var(--blue);
+  background: var(--blue-tint);
   font-family: var(--serif);
   font-size: 18px;
   line-height: 1.5;
@@ -1301,21 +1337,31 @@ textarea::placeholder {
   margin-top: 10px;
 }
 
-.page-head + .prose + .form,
-.warning + .form {
-  margin-top: 24px;
-}
 
 .preview-project + .preview-project {
   margin-top: 12px;
 }
 
 .rejected-note {
-  margin-bottom: 16px;
   padding: 10px 14px;
-  background: var(--paper-2);
+  border-left: 4px solid var(--red);
+  background: #fff;
   font-size: 16px;
   font-weight: 600;
+}
+
+/* ---- Profiles ---- */
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-big {
+  width: 84px;
+  height: 84px;
+  font-size: 30px;
 }
 
 /* ---- The view switch (stream and group pages, lead view) ---- */
@@ -1388,27 +1434,6 @@ textarea::placeholder {
 }
 
 /* ---- Lead view (views/manage.js) ---- */
-
-.demo-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px dashed #9a9b9f;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.demo-note .demo-tag {
-  flex: none;
-  margin-top: 1px;
-}
-
-.block-lead {
-  margin: -4px 0 16px;
-  color: var(--muted);
-  font-size: 16px;
-}
 
 .count {
   display: inline-grid;
@@ -1609,15 +1634,15 @@ textarea::placeholder {
   place-items: center;
   width: 26px;
   height: 26px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--red);
+  color: var(--red);
   font-size: 13px;
   font-weight: 800;
 }
 
 .funnel-mark-done {
   border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
+  color: var(--blue);
 }
 
 .funnel-title {
@@ -1649,9 +1674,9 @@ textarea::placeholder {
 }
 
 .chip-you {
-  border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
+  border: 2px solid var(--blue);
+  background: #fff;
+  color: var(--blue);
 }
 
 /* Editing (a stream) */
@@ -1748,6 +1773,14 @@ textarea::placeholder {
   background: var(--paper-2);
 }
 
+.edit-tools .btn-link {
+  color: var(--blue);
+}
+
+.edit-tools .btn-link.remove {
+  color: var(--red);
+}
+
 .icon-btn:disabled,
 .btn-link:disabled {
   opacity: 0.3;
@@ -1802,8 +1835,8 @@ textarea::placeholder {
 
 .open-tag {
   padding: 1px 8px;
-  border: 2px dashed #9a9b9f;
-  color: var(--muted);
+  border: 2px dashed var(--red);
+  color: var(--red);
   font-size: 13px;
   font-weight: 700;
 }
@@ -1857,17 +1890,24 @@ textarea::placeholder {
   font-weight: 600;
 }
 
+/* Ink banner with the red dot (the website's footer), navy text, a wide red button: balanced also when the banner
+   has scrolled away on a phone. */
 .email-banner {
-  padding: 18px 28px;
-  background: var(--red);
+  padding: 12px 28px;
+  background: var(--ink);
   color: #fff;
   font-size: 22px;
   font-weight: 900;
   letter-spacing: -0.03em;
 }
 
+.email-cta .btn {
+  padding: 16px 40px;
+}
+
 .email-body {
   padding: 28px 28px 32px;
+  color: var(--blue);
   font-family: var(--serif);
   font-size: 18px;
   line-height: 1.55;
@@ -1964,10 +2004,6 @@ textarea::placeholder {
     opacity: 0.9;
   }
 
-  .me-name {
-    display: none;
-  }
-
   .main {
     padding-top: 24px;
   }
@@ -1990,15 +2026,6 @@ textarea::placeholder {
 
   .grid {
     grid-template-columns: 1fr;
-  }
-
-  .lead-box {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .lead-box .badge {
-    align-self: flex-start;
   }
 
   .prose,
@@ -2026,7 +2053,6 @@ textarea::placeholder {
     width: 58px;
   }
 
-  .join-box,
   .form.card,
   .pending-box {
     padding: 18px;
@@ -2046,7 +2072,7 @@ textarea::placeholder {
   }
 
   .email-banner {
-    padding: 14px 18px;
+    padding: 12px 18px;
   }
 
   .task-actions .btn {

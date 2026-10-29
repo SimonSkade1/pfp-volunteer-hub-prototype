@@ -1,4 +1,5 @@
-// The demo's first screen: the welcome email a new volunteer gets after signing up on the website (Spec 3, 17).
+// The demo's first screen: the welcome email a new volunteer gets after signing up on the website (Spec 3, 17). Its
+// caption is Demo-tagged: it tells what happened out of sight, the signup (Spec 23.2).
 
 import { volunteer, welcomeEmail as mail } from '../data.js'
 import { href } from '../router.js'
@@ -8,7 +9,7 @@ import { prototypeBar } from './layout.js'
 export function emailView() {
   return html`${prototypeBar()}
     <main class="email-stage">
-      <p class="email-caption">${volunteer.firstName} signed up on peopleforapause.org with their name, email and location. A minute later, this email arrives:</p>
+      <p class="email-caption"><span class="demo-tag">Demo</span> ${volunteer.firstName} signed up on peopleforapause.org with their name, email and location. A minute later, this email arrives:</p>
       <article class="email" data-testid="welcome-email">
         <header class="email-head">
           <h1 class="email-subject">${mail.subject}</h1>

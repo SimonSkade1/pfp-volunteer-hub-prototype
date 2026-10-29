@@ -2,7 +2,7 @@
 // applications, the same for both kinds: each with Claude's pre-screen (Spec 14) and its reasons, accept / reject.
 // Then, for a stream: where its members are in its steps, and an editor for its description, steps and resources;
 // for a group: its projects' task boards and a form to create a project. Editing is mock: it changes the content in
-// data.js in place, so the volunteer side shows it at once, until the page is reloaded.
+// data.js in place, so the volunteer side shows it at once, until the page is reloaded. No explanatory text (Spec 23.2).
 
 import { findGroup, findItem, findStream, volunteer } from '../data.js'
 import { href } from '../router.js'
@@ -22,7 +22,7 @@ window.addEventListener('hashchange', () => {
 
 export function manageView(id) {
   const item = findItem(id)
-  if (!item || item.kind === 'start') return notFound()
+  if (item?.kind !== 'stream' && item?.kind !== 'group') return notFound() // Getting started and vacancies have none
   const isStream = item.kind === 'stream'
 
   return hubPage(html`
@@ -30,10 +30,7 @@ export function manageView(id) {
     <div class="page-head" data-testid="manage-${item.id}">
       <p class="eyebrow">Lead view · ${isStream ? 'Stream' : 'Local group'}</p>
       <h1>${item.title}</h1>
-      <p class="lead">The ${isStream ? 'stream' : 'group'} as its lead, ${item.lead}, sees it: applications to decide on,
-        ${isStream ? 'where the members are in the steps, and the stream’s content to edit.' : 'the projects’ task boards, and a form for a new project.'}</p>
     </div>
-    <p class="demo-note"><span class="demo-tag">Demo</span> What you change here shows on the volunteer view right away and lasts until you reload the page.</p>
     ${applicationsPanel(item)}
     ${isStream ? html`${membersPanel(item)}${editPanel(item)}` : projectsPanel(item)}
   `)
@@ -49,7 +46,6 @@ function applicationsPanel(item) {
   const decided = all.filter((a) => a.status !== 'pending')
   return html`<section class="block" data-testid="applications">
     <h2 class="block-title">Applications${waiting.length ? html` <span class="count">${waiting.length}</span>` : ''}</h2>
-    <p class="block-lead">Claude pre-screens each application against what you ask of applicants, and you decide. New ones also reach you by email.</p>
     ${waiting.length
       ? html`<ul class="applications">${waiting.map((a) => applicationCard(item, a))}</ul>`
       : html`<p class="empty" data-testid="no-applications">No applications are waiting for you.</p>`}
@@ -111,7 +107,6 @@ function membersPanel(stream) {
   </li>`
   return html`<section class="block" data-testid="members-progress">
     <h2 class="block-title">Members <span class="count count-quiet">${memberCount(stream)}</span></h2>
-    <p class="block-lead">Everyone in the stream, under the step they’re on.</p>
     <ol class="funnel">
       ${stream.tasks.map((task, i) => row(html`<span class="funnel-mark">${i + 1}</span>`, task.title, rows[i], `funnel-${task.id}`))}
       ${row(html`<span class="funnel-mark funnel-mark-done">${icon('check')}</span>`, 'All steps done', rows[stream.tasks.length], 'funnel-done')}
@@ -122,7 +117,6 @@ function membersPanel(stream) {
 function editPanel(stream) {
   return html`<section class="block" data-testid="edit-stream">
     <h2 class="block-title">Edit the stream</h2>
-    <p class="block-lead">Volunteers see your changes right away: switch to the volunteer view to check.</p>
     ${descriptionEditor(stream)}${stepsEditor(stream)}${resourcesEditor(stream)}
   </section>`
 }
@@ -137,7 +131,6 @@ function descriptionEditor(stream) {
     ${open
       ? html`<form class="edit-form edit-form-box" data-form="description" data-id="${stream.id}" data-testid="description-form">
           <label class="field">
-            <span class="hint">An empty line starts a new paragraph.</span>
             <textarea name="description" rows="8" required aria-label="Description" data-autofocus data-testid="description-text">${stream.description.join('\n\n')}</textarea>
           </label>
           ${formButtons('Save')}
@@ -166,7 +159,7 @@ function stepsEditor(stream) {
                 <button class="icon-btn" type="button" data-action="move-step" data-id="${stream.id}" data-task="${task.id}" data-by="-1" aria-label="Move up" ${i === 0 ? 'disabled' : ''} data-testid="step-up">${icon('up')}</button>
                 <button class="icon-btn" type="button" data-action="move-step" data-id="${stream.id}" data-task="${task.id}" data-by="1" aria-label="Move down" ${i === last ? 'disabled' : ''} data-testid="step-down">${icon('down')}</button>
                 <button class="btn-link" type="button" data-action="edit" data-id="${stream.id}" data-key="step:${task.id}" data-testid="step-edit">Edit</button>
-                <button class="btn-link" type="button" data-action="remove-step" data-id="${stream.id}" data-task="${task.id}" ${last === 0 ? 'disabled' : ''} data-testid="step-remove">Remove</button>
+                <button class="btn-link remove" type="button" data-action="remove-step" data-id="${stream.id}" data-task="${task.id}" ${last === 0 ? 'disabled' : ''} data-testid="step-remove">Remove</button>
               </div>
             </li>`,
       )}
@@ -187,8 +180,8 @@ function stepForm(stream, task) {
     </div>
     <label class="field"><span class="label-sm">Summary</span>
       <input name="summary" value="${task?.summary}" placeholder="One line: what this step is about" data-testid="step-summary"></label>
-    <label class="field"><span class="label-sm">How to do it</span><span class="hint">One instruction per line.</span>
-      <textarea name="howto" rows="5" required data-testid="step-howto">${task ? task.steps.join('\n') : ''}</textarea></label>
+    <label class="field"><span class="label-sm">How to do it</span>
+      <textarea name="howto" rows="5" required placeholder="One instruction per line" data-testid="step-howto">${task ? task.steps.join('\n') : ''}</textarea></label>
     ${formButtons(task ? 'Save' : 'Add step')}
   </form>`
 }
@@ -210,7 +203,7 @@ function resourcesEditor(stream) {
                   </div>
                   <div class="edit-tools">
                     <button class="btn-link" type="button" data-action="edit" data-id="${stream.id}" data-key="resource:${i}" data-testid="resource-edit">Edit</button>
-                    <button class="btn-link" type="button" data-action="remove-resource" data-id="${stream.id}" data-index="${i}" data-testid="resource-remove">Remove</button>
+                    <button class="btn-link remove" type="button" data-action="remove-resource" data-id="${stream.id}" data-index="${i}" data-testid="resource-remove">Remove</button>
                   </div>
                 </li>`,
           )}
@@ -243,9 +236,8 @@ function resourceForm(stream, resource, index) {
 function projectsPanel(group) {
   return html`<section class="block" data-testid="projects">
     <h2 class="block-title">Projects</h2>
-    <p class="block-lead">Members are in every project by default and claim its tasks on the group page.</p>
     ${group.projects.map((project) => projectBoard(group, project, true))}
-    <div class="add-project">${isEditing(group, 'project:new') ? projectForm(group) : addButton(group, 'project:new', 'Create a project', 'create-project', 'btn-primary')}</div>
+    <div class="add-project">${isEditing(group, 'project:new') ? projectForm(group) : addButton(group, 'project:new', 'Create a project', 'create-project')}</div>
   </section>`
 }
 
@@ -256,7 +248,7 @@ function projectForm(group) {
       <input name="title" required data-autofocus placeholder="e.g. Tabling at the Royal Oak farmers market" data-testid="project-name"></label>
     <label class="field"><span class="label">Description <span class="optional">Optional</span></span>
       <textarea name="description" rows="3" placeholder="What, when and where, and your goal." data-testid="project-description"></textarea></label>
-    <label class="field"><span class="label">Tasks</span><span class="hint">One per line. Members claim them on the group page.</span>
+    <label class="field"><span class="label">Tasks</span>
       <textarea name="tasks" rows="5" required placeholder="Ask the market for a table&#10;Pick up the tabling kit&#10;Run the table, Sat 9–11 am" data-testid="project-tasks"></textarea></label>
     ${formButtons('Create project')}
   </form>`

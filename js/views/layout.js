@@ -13,6 +13,7 @@ export function prototypeBar() {
   </div>`
 }
 
+// Sticky, so its red and blue ribbon is in every screenful (Spec 23.1). Your initials open your profile (Spec 5.1).
 function topBar() {
   return html`<header class="topbar">
     <div class="wrap topbar-inner">
@@ -20,9 +21,7 @@ function topBar() {
         <span class="wordmark">People for a Pause<span class="dot">.</span></span>
         <span class="brand-sub">Volunteer hub</span>
       </a>
-      <div class="me" data-testid="me" title="${volunteer.name} · ${volunteer.place}">
-        <span class="avatar">${volunteer.initials}</span><span class="me-name">${volunteer.name}</span>
-      </div>
+      <a class="avatar" href="${href.me}" title="Your profile" aria-label="Your profile" data-testid="me">${volunteer.initials}</a>
     </div>
   </header>`
 }

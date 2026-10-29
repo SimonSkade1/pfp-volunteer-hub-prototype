@@ -1,72 +1,70 @@
-// The hub's main page (Spec 6), top to bottom: Your streams (with Getting started), Local groups (near you, then not
-// too far away), "Apply to lead a local group", Current streams, "Apply to lead a stream". A card opens its page.
+// The hub's main page (Spec 6), top to bottom: Your groups and streams; Join a local group (while you're in no group
+// and wait on none): the groups within the radius, nearest first, then the start-a-group link; Join a stream: the
+// streams you're not in, Getting started last; "Want to do more?": the link to the vacancies. Cards have no buttons:
+// a card opens its page, whose head holds Apply (Getting started: Join).
 
-import { FAR_MI, NEAR_MI, groups, leadForms, streams, volunteer } from '../data.js'
+import { RADIUS_MI, firstName, groups, streams, volunteer } from '../data.js'
 import { href } from '../router.js'
-import { memberCount, membership, progress, projectCounts, state } from '../state.js'
-import { html, icon, pluralize, progressBar, statusBadge } from '../ui.js'
+import { memberCount, membership, progress, projectCounts } from '../state.js'
+import { html, icon, pluralize, statusBadge } from '../ui.js'
 import { hubPage } from './layout.js'
 
 export function homeView() {
   const start = streams.find((s) => s.kind === 'start')
   const nationwide = streams.filter((s) => s.kind === 'stream')
-  const yours = [...groups, ...nationwide].filter((item) => membership(item.id) !== 'none')
-  const near = groups.filter((g) => g.distance <= NEAR_MI)
-  const notFar = groups.filter((g) => g.distance > NEAR_MI && g.distance <= FAR_MI)
+  const yours = [...groups, ...nationwide, start].filter((item) => membership(item.id) !== 'none')
+  const groupFree = groups.every((g) => membership(g.id) === 'none')
+  const nearby = groups.filter((g) => g.distance <= RADIUS_MI).sort((a, b) => a.distance - b.distance)
+  const toJoin = [...nationwide, start].filter((s) => membership(s.id) === 'none')
 
   return hubPage(
     html`
-      <div class="page-head">
-        <h1>Hi ${volunteer.firstName}</h1>
-        <p class="lead">Start with your first action, then find a local group or a stream to join.</p>
-      </div>
+      <div class="page-head"><h1>Hi ${volunteer.firstName}</h1></div>
 
-      <section class="section" data-testid="your-streams">
-        <h2 class="section-title">Your streams</h2>
-        <div class="grid">${startCard(start)}${yours.map(yourCard)}</div>
+      <section class="section" data-testid="your-items">
+        <h2 class="section-title">Your groups and streams</h2>
+        ${yours.length
+          ? html`<div class="grid">${yours.map(yourCard)}</div>`
+          : html`<p class="empty" data-testid="your-empty">You’re in no group or stream yet.</p>`}
       </section>
 
-      <section class="section" data-testid="local-groups">
-        <h2 class="section-title">Local groups</h2>
-        <p class="section-lead">Groups meet in person and run events where they live.</p>
-        <h3 class="subhead">Near you</h3>
-        ${near.length
-          ? html`<div class="grid">${near.map(groupCard)}</div>`
-          : html`<p class="empty" data-testid="no-group-near">No local group near ${volunteer.place} yet.</p>`}
-        ${notFar.length ? html`<h3 class="subhead">Not too far away</h3><div class="grid">${notFar.map(groupCard)}</div>` : ''}
-        ${leadBox('group', near.length ? 'Want to start a group?' : 'No group near you? Start one.', 'Leading a local group is a lot of work, and we interview every applicant.')}
-      </section>
+      ${groupFree
+        ? html`<section class="section" data-testid="join-group">
+            <h2 class="section-title">Join a local group</h2>
+            ${nearby.length
+              ? html`<div class="grid">${nearby.map(groupCard)}</div>`
+              : html`<p class="empty" data-testid="no-group-near">No local groups nearby.</p>`}
+            <p class="section-cta"><a class="cta" href="${href.vacancy('start-group')}" data-testid="start-group">Start a local group where you live ${icon('right')}</a></p>
+          </section>`
+        : ''}
 
-      <section class="section" data-testid="current-streams">
-        <h2 class="section-title">Current streams</h2>
-        <p class="section-lead">Nationwide efforts you can join from anywhere.</p>
-        <div class="grid">${nationwide.map(streamCard)}</div>
-        ${leadBox('stream', 'Have an idea for a stream?', 'Lead one of ours or pitch a new one. We interview every applicant.')}
+      ${toJoin.length
+        ? html`<section class="section" data-testid="join-stream">
+            <h2 class="section-title">Join a stream</h2>
+            <div class="grid">${toJoin.map(streamCard)}</div>
+          </section>`
+        : ''}
+
+      <section class="section" data-testid="do-more">
+        <h2 class="section-title">Want to do more?</h2>
+        <p class="section-cta"><a class="cta" href="${href.vacancies}" data-testid="vacancies-link">Check out our volunteer vacancies ${icon('right')}</a></p>
       </section>
     `,
     'wide',
   )
 }
 
-// Getting started: everyone is in it; its card leads straight to the next action.
-function startCard(stream) {
-  const p = progress(stream)
-  return html`<article class="card card-start" data-testid="card-${stream.id}">
-    <h3 class="card-title"><a class="stretched" href="${href.stream(stream.id)}">${stream.title}</a></h3>
-    <p class="card-text">${stream.tagline}</p>
-    ${progressBar(p)}
-    ${p.next
-      ? html`<p class="card-next"><span class="card-next-label">${p.done ? 'Up next' : 'Your first action'} · ${p.next.time}</span>${p.next.title}</p>
-          <div class="card-actions"><a class="btn btn-inverse" href="${href.task(stream.id, p.next.id)}" data-testid="start-next">${p.done ? 'Continue' : 'Start'} ${icon('right')}</a></div>`
-      : html`<p class="card-next">${icon('check')} All done. ${stream.doneNote}</p>`}
-  </article>`
-}
+// The title is the card's link (stretched over the card); the arrow only shows that the card opens a page.
+export const cardTitle = (item) =>
+  html`<h3 class="card-title"><a class="stretched" href="${href.item(item)}">${item.title}</a>${icon('right')}</h3>`
 
-// A group or stream you're in or have applied to.
+const KINDS = { group: 'Local group', stream: 'Stream', start: 'Roadmap' }
+
+// A group or stream you're in or have applied to: only a pending one carries a badge (Spec 17.5).
 function yourCard(item) {
   const status = membership(item.id)
   let line
-  if (status === 'pending') line = html`<p class="card-text muted">Application sent. ${item.lead.split(' ')[0]} gets back to you soon.</p>`
+  if (status === 'pending') line = html`<p class="card-text muted">Application sent. ${firstName(item.lead)} gets back to you soon.</p>`
   else if (item.kind === 'group') {
     const [project] = item.projects
     const counts = projectCounts(item, project)
@@ -78,54 +76,39 @@ function yourCard(item) {
       ? html`<p class="card-text"><strong>Up next:</strong> ${p.next.title}</p><p class="card-text muted">${p.done} of ${p.total} steps done</p>`
       : html`<p class="card-text">${icon('check')} All steps done</p>`
   }
-  return html`<article class="card" data-testid="your-${item.id}">
-    <div class="card-top">${statusBadge(status)}<span class="card-kind">${item.kind === 'group' ? 'Local group' : 'Stream'}</span></div>
-    <h3 class="card-title"><a class="stretched" href="${href.item(item)}">${item.title}</a></h3>
+  return html`<article class="card" data-testid="card-${item.id}">
+    <div class="card-top"><span class="card-kind">${KINDS[item.kind]}</span>${status === 'pending' ? statusBadge(status) : ''}</div>
+    ${cardTitle(item)}
     ${line}
   </article>`
 }
 
 function groupCard(group) {
   return html`<article class="card" data-testid="card-${group.id}">
-    <h3 class="card-title"><a class="stretched" href="${href.group(group.id)}">${group.title}</a></h3>
+    ${cardTitle(group)}
     ${metaLine('pin', [`${group.distance} mi from you`, group.place])}
     <p class="card-text">${group.tagline}</p>
     ${metaLine('users', [pluralize(memberCount(group), 'member')])}
     ${metaLine('calendar', [group.meets])}
-    ${applyArea(group)}
   </article>`
 }
 
 function streamCard(stream) {
+  if (stream.kind === 'start')
+    return html`<article class="card" data-testid="card-${stream.id}">
+      ${cardTitle(stream)}
+      <p class="card-text">${stream.tagline}</p>
+      ${metaLine('clock', [`${pluralize(stream.tasks.length, 'step')}, a few minutes each`])}
+      <p class="card-tags"><span class="tag" data-testid="no-application">No application required</span></p>
+    </article>`
   return html`<article class="card" data-testid="card-${stream.id}">
-    <h3 class="card-title"><a class="stretched" href="${href.stream(stream.id)}">${stream.title}</a></h3>
+    ${cardTitle(stream)}
     <p class="card-text">${stream.tagline}</p>
     ${metaLine('clock', [stream.commitment])}
     ${metaLine('pin', [stream.where])}
     ${metaLine('users', [pluralize(memberCount(stream), 'volunteer'), `led by ${stream.lead}`])}
-    ${applyArea(stream)}
   </article>`
 }
 
-const metaLine = (iconName, parts) => html`<p class="card-meta">${icon(iconName)}${parts.map((part) => html`<span>${part}</span>`)}</p>`
-
-function applyArea(item) {
-  const status = membership(item.id)
-  if (status === 'none')
-    return html`<div class="card-actions"><a class="btn btn-primary over-stretched" href="${href.apply(item.id)}" data-testid="apply-${item.id}">Apply to join</a></div>`
-  return html`<div class="card-actions">${statusBadge(status)}</div>`
-}
-
-function leadBox(kind, title, text) {
-  const form = leadForms[kind]
-  const sent = state.leadApplications[kind]
-  return html`<div class="lead-box" data-testid="lead-box-${kind}">
-    <div>
-      <h3 class="lead-box-title">${title}</h3>
-      <p class="lead-box-text">${sent ? form.sent : text}</p>
-    </div>
-    ${sent
-      ? html`<span class="badge badge-pending">${icon('clock')} Sent</span>`
-      : html`<a class="btn btn-secondary" href="${href.lead(kind)}" data-testid="lead-${kind}">${form.title} ${icon('right')}</a>`}
-  </div>`
-}
+export const metaLine = (iconName, parts) =>
+  html`<p class="card-meta">${icon(iconName)}${parts.map((part) => html`<span>${part}</span>`)}</p>`

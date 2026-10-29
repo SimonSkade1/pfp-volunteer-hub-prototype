@@ -3,15 +3,16 @@
 
 import { findItem, volunteer } from './data.js'
 
-const KEY = 'pfp-volunteer-hub-prototype:v1' // bump when the stored shape changes: old state is dropped
+const KEY = 'pfp-volunteer-hub-prototype:v2' // bump when the stored shape changes: old state is dropped
 
 const seed = () => ({
   onboarded: false,
-  profile: { about: '', hopes: '' }, // the onboarding step
-  applications: {}, // stream or group id -> { status: 'pending' | 'accepted' | 'rejected', text }
+  profile: { about: '', hours: '' }, // the onboarding step (Spec 5); your profile shows it
+  joined: {}, // id -> true: what you joined without an application (Getting started)
+  applications: {}, // stream, group or vacancy id -> { status: 'pending' | 'accepted' | 'rejected', text }
   done: {}, // 'streamId/taskId' -> true: your own progress in a stream's pipeline
   claims: {}, // 'groupId/projectId/taskId' -> 'claimed' | 'done': team tasks you took
-  leadApplications: {}, // 'group' | 'stream' -> the submitted form fields
+  discord: false, // the mock "Connect Discord" (Spec 22): once connected, channel lines offer "Open"
 })
 
 function handleResetParam() {
@@ -64,9 +65,10 @@ export function rerender() {
 
 // ---- Selectors: content combined with the volunteer's state ----
 
-// 'member' | 'pending' | 'none'. Everyone is in Getting started. After a rejection you can apply again: 'none'.
+// 'member' | 'pending' | 'none'. Getting started: 'member' once you joined it. A vacancy you applied to stays
+// 'pending' (no acceptance in the demo). After a rejection you can apply again: 'none'.
 export function membership(id) {
-  if (findItem(id)?.kind === 'start') return 'member'
+  if (findItem(id)?.kind === 'start') return state.joined[id] ? 'member' : 'none'
   const status = state.applications[id]?.status
   if (status === 'accepted') return 'member'
   if (status === 'pending') return 'pending'
@@ -81,12 +83,7 @@ export function memberCount(item) {
   return item.members.length + acceptedApplicants(item).length + (membership(item.id) === 'member' ? 1 : 0)
 }
 
-export function hasApplied() {
-  return Object.keys(state.applications).length > 0
-}
-
 export function isTaskDone(streamId, task) {
-  if (task.doneWhen === 'applied' && hasApplied()) return true
   return Boolean(state.done[`${streamId}/${task.id}`])
 }
 
@@ -118,7 +115,8 @@ export function projectCounts(group, project) {
 // ---- The lead view (Spec 21) ----
 
 // A stream's or group's applications as its lead sees them: yours first (once you've applied), then the mock ones.
-// Yours has no pre-screen: the prototype can't run Claude on what you typed (`screen: 'demo'`).
+// Yours has no pre-screen: the prototype can't run Claude on what you typed (`screen: 'demo'`). Your profile (the
+// onboarding's answers, Spec 5.1) comes with it.
 export function applicationsFor(item) {
   const own = state.applications[item.id]
   if (!own) return item.applications
@@ -129,6 +127,7 @@ export function applicationsFor(item) {
     when: 'Just now',
     text: own.text,
     about: state.profile.about,
+    hours: state.profile.hours,
     screen: 'demo',
     reasons: [],
     status: own.status,
@@ -181,6 +180,19 @@ export function accept(id) {
   })
 }
 
+// Getting started: one click, no form, no pending (Spec 6.3.3).
+export function join(id) {
+  update((s) => {
+    s.joined[id] = true
+  })
+}
+
+export function connectDiscord() {
+  update((s) => {
+    s.discord = true
+  })
+}
+
 export function setDone(streamId, taskId, done) {
   update((s) => {
     if (done) s.done[`${streamId}/${taskId}`] = true
@@ -201,10 +213,3 @@ export function completeOnboarding(profile) {
     s.onboarded = true
   })
 }
-
-export function sendLeadApplication(kind, fields) {
-  update((s) => {
-    s.leadApplications[kind] = fields
-  })
-}
-
