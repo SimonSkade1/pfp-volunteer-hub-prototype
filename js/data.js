@@ -65,9 +65,9 @@ export const streams = [
         id: 'learn',
         title: 'Learn why we want a pause',
         time: '15 min',
-        summary: 'What superintelligence is, and how a treaty can stop the race.',
+        summary: 'Who we are, and why scientists call for a ban on superintelligence.',
         steps: [
-          'Read the About page of our website: who we are and what we ask for.',
+          'Read the About page of our website: who we are and what we stand for.',
           'Then read the Statement on Superintelligence: AI scientists and public figures from left and right call for a ban on building superintelligence.',
           'Want more? The resources below go deeper.',
         ],
