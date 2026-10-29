@@ -1,7 +1,7 @@
 // The hub's main page (Spec 6), top to bottom: Your groups and streams; Join a local group (while you're in no group
-// and wait on none): the groups within the radius, nearest first, then the start-a-group link; Join a stream: the
-// streams you're not in, Getting started last; "Want to do more?": the link to the vacancies. Cards have no buttons:
-// a card opens its page, whose head holds Apply (Getting started: Join).
+// and wait on none): the groups within the radius, nearest first, then a quiet line linking the start-a-group vacancy;
+// Join a stream: the streams you're not in, Getting started last; last a quiet line linking the vacancies ("Want to do
+// more?"; Spec 25). Cards have no buttons: a card opens its page, whose head holds Apply (Getting started: Join).
 
 import { RADIUS_MI, firstName, groups, streams, volunteer } from '../data.js'
 import { href } from '../router.js'
@@ -34,7 +34,7 @@ export function homeView() {
             ${nearby.length
               ? html`<div class="grid">${nearby.map(groupCard)}</div>`
               : html`<p class="empty" data-testid="no-group-near">No local groups nearby.</p>`}
-            <p class="section-cta"><a class="cta" href="${href.vacancy('start-group')}" data-testid="start-group">Start a local group where you live ${icon('right')}</a></p>
+            <p class="quiet-line">Want to start a local group where you live? <a href="${href.vacancy('start-group')}" data-testid="start-group">You can apply to lead one.</a></p>
           </section>`
         : ''}
 
@@ -45,10 +45,7 @@ export function homeView() {
           </section>`
         : ''}
 
-      <section class="section" data-testid="do-more">
-        <h2 class="section-title">Want to do more?</h2>
-        <p class="section-cta"><a class="cta" href="${href.vacancies}" data-testid="vacancies-link">Check out our volunteer vacancies ${icon('right')}</a></p>
-      </section>
+      <p class="section quiet-line" data-testid="do-more">Want to do more? <a href="${href.vacancies}" data-testid="vacancies-link">Check out our volunteer vacancies.</a></p>
     `,
     'wide',
   )

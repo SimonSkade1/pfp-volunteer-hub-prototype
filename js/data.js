@@ -431,7 +431,7 @@ export const vacancies = [
     kind: 'vacancy',
     title: 'Social media',
     tagline: 'Run our accounts on X, Instagram and TikTok.',
-    commitment: 'About 5 hours a week',
+    commitment: '10+ hours a week',
     where: 'From home',
     description: [
       'Post our events, share what our volunteers achieve, and answer questions in the comments. You plan the posts with our organizing director and get photos and clips from the local groups.',
@@ -444,7 +444,7 @@ export const vacancies = [
     kind: 'vacancy',
     title: 'Media outreach',
     tagline: 'Get our message into newspapers, radio and TV.',
-    commitment: '3–5 hours a week',
+    commitment: '10+ hours a week',
     where: 'From home',
     description: [
       'Pitch stories to journalists, write press releases for our events, and prepare our volunteers for interviews. You keep the list of reporters who cover AI, nationally and near our local groups.',
@@ -457,7 +457,7 @@ export const vacancies = [
     kind: 'vacancy',
     title: 'Volunteer onboarding',
     tagline: 'Welcome new volunteers and help each one find their place.',
-    commitment: '3–5 hours a week',
+    commitment: '10+ hours a week',
     where: 'From home',
     description: [
       'Call new volunteers for 15 minutes, answer their questions on Discord, and help each one find a local group or stream that fits. A month later, check in on how it’s going.',

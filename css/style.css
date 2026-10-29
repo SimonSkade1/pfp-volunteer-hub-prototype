@@ -2,9 +2,9 @@
    Red and blue in balance within every screenful (Spec 23.1; check: scripts/color_balance.py):
    - the sticky top bar carries both, in its ribbon;
    - a page head pairs its navy title with a red eyebrow chip, and with the red call to action beside it;
-   - red marks what you can do (primary buttons, call-to-action links, a card's arrow, the next step, the setting we
-     recommend), blue where you are and what things are (titles, badges, tags, progress and done marks, icons, links,
-     secondary buttons);
+   - red marks what you can do (primary buttons, the main page's two quiet links, a card's arrow, the next step, the
+     setting we recommend), blue where you are and what things are (titles, badges, tags, progress and done marks,
+     icons, other links, secondary buttons);
    - avatars, section titles and body text are ink. */
 
 @font-face {
@@ -374,23 +374,23 @@ select {
   margin-top: 16px;
 }
 
-.section-cta {
-  margin-top: 16px;
+/* A quiet line (Spec 25): muted body text whose second sentence is a plain red link; under the local groups (the
+   start-a-group vacancy) and ending the main page (the vacancies). */
+.quiet-line {
+  color: var(--muted);
 }
 
-.cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.quiet-line a {
+  display: inline-block; /* on a phone, the link moves to the next line whole instead of breaking */
   color: var(--red);
-  font-size: 18px;
-  font-weight: 800;
-  text-decoration: none;
 }
 
-.cta:hover {
+.quiet-line a:hover {
   color: var(--red-deep);
-  text-decoration: underline;
+}
+
+.section > .quiet-line {
+  margin-top: 16px;
 }
 
 .grid {
