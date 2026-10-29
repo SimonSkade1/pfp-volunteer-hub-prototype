@@ -1,19 +1,22 @@
-// The lead view (Spec 21), reached by the demo's "view as" switch on a stream's or group's page. First the
-// applications, the same for both kinds: each with Claude's pre-screen (Spec 14) and its reasons, accept / reject.
+// The lead view (Spec 21), reached by the demo's "view as" switch on a stream's or group's page. First the lead's
+// expectations (Spec 7.1), editable, and who accepts applications (Spec 14): the lead, or Claude for clear cases. Then
+// the applications, the same for both kinds: each with the applicant's profile (Spec 5.1) and Claude's pre-screen
+// (Spec 14) with its reasons, accept / reject; Claude's accepts are marked, and the lead can undo them.
 // Then, for a stream: where its members are in its steps, and an editor for its description, steps and resources;
 // for a group: its projects' task boards and a form to create a project. Editing is mock: it changes the content in
 // data.js in place, so the volunteer side shows it at once, until the page is reloaded. No explanatory text (Spec 23.2).
 
 import { findGroup, findItem, findStream, volunteer } from '../data.js'
 import { href } from '../router.js'
-import { applicationsFor, memberCount, membersByStep, rerender, setApplicationStatus } from '../state.js'
-import { html, icon, paragraphs, toast } from '../ui.js'
+import { applicationsFor, memberCount, membersByStep, rerender, setApplicationStatus, setClaudeAccepts } from '../state.js'
+import { html, icon, paragraphs, richParagraphs, toast } from '../ui.js'
 import { projectBoard } from './group.js'
 import { hubPage, pageTop, viewSwitch } from './layout.js'
 import { notFound } from './stream.js'
 
-// The open editor, if any: { id: the stream or group, key: 'description' | 'step:<task id>' | 'step:new' |
-// 'resource:<index>' | 'resource:new' | 'project:new' }. One at a time; every change and every new page closes it.
+// The open editor, if any: { id: the stream or group, key: 'expectations' | 'description' | 'step:<task id>' |
+// 'step:new' | 'resource:<index>' | 'resource:new' | 'project:new' }. One at a time; every change and every new page
+// closes it.
 let editing = null
 const isEditing = (item, key) => editing?.id === item.id && editing.key === key
 window.addEventListener('hashchange', () => {
@@ -31,9 +34,52 @@ export function manageView(id) {
       <p class="eyebrow">Lead view · ${isStream ? 'Stream' : 'Local group'}</p>
       <h1>${item.title}</h1>
     </div>
+    ${expectationsEditor(item)}${claudeSetting(item)}
     ${applicationsPanel(item)}
     ${isStream ? html`${membersPanel(item)}${editPanel(item)}` : projectsPanel(item)}
   `)
+}
+
+// ---- How people get in (Spec 7.1, 14): the lead's expectations and who accepts, for streams and groups ----
+
+// The text applicants see on the apply page, and Claude checks applications against (Spec 14: a stricter text is a
+// stricter filter). It may hold links written [label](https://…): the editor shows them so.
+function expectationsEditor(item) {
+  const open = isEditing(item, 'expectations')
+  return html`<section class="edit-block" data-testid="edit-expectations">
+    <div class="edit-block-head">
+      <h2 class="edit-block-title">What you expect from applicants</h2>
+      ${open ? '' : html`<button class="btn btn-secondary btn-small" type="button" data-action="edit" data-id="${item.id}" data-key="expectations" data-testid="expectations-edit">Edit</button>`}
+    </div>
+    ${open
+      ? html`<form class="edit-form edit-form-box" data-form="expectations" data-id="${item.id}" data-testid="expectations-form">
+          <label class="field">
+            <textarea name="expectations" rows="6" required aria-label="What you expect from applicants" data-autofocus data-testid="expectations-text">${item.expectations}</textarea>
+          </label>
+          ${formButtons('Save')}
+        </form>`
+      : html`<div class="prose prose-edit">${richParagraphs(item.expectations)}</div>`}
+  </section>`
+}
+
+const SETTINGS = [
+  { on: false, label: 'I review every application', testid: 'setting-lead' },
+  { on: true, label: 'Claude accepts clear cases, I review the rest', tag: 'Recommended', testid: 'setting-claude' },
+]
+
+// One click switches (no Save), like a radio group; the choice is the whole label.
+function claudeSetting(item) {
+  return html`<section class="edit-block" data-testid="claude-setting">
+    <h2 class="edit-block-title" id="setting-${item.id}">Who accepts applications</h2>
+    <div class="setting" role="radiogroup" aria-labelledby="setting-${item.id}">
+      ${SETTINGS.map(
+        (option) => html`<label class="setting-option" data-action="claude-setting" data-id="${item.id}" data-on="${option.on ? 'on' : ''}" data-testid="${option.testid}">
+          <input type="radio" name="setting-${item.id}" ${Boolean(item.claudeAccepts) === option.on ? 'checked' : ''}>
+          <span>${option.label}${option.tag ? html` <span class="tag tag-small tag-nudge">${option.tag}</span>` : ''}</span>
+        </label>`,
+      )}
+    </div>
+  </section>`
 }
 
 // ---- Applications (Spec 13, 14), the same for streams and groups ----
@@ -54,14 +100,18 @@ function applicationsPanel(item) {
           <ul class="decided" data-testid="decided">
             ${decided.map((a) => html`<li data-testid="decided-${a.id}">
               <span class="decided-name">${a.name}</span>
-              ${a.status === 'accepted'
-                ? html`<span class="badge badge-member">${icon('check')} Accepted</span>`
-                : html`<span class="badge badge-rejected">Rejected</span>`}
+              ${decidedBadge(a)}
               <button class="btn-link" type="button" ${decideAttrs(item, a, 'pending')} data-testid="undo-decision">Undo</button>
             </li>`)}
           </ul>`
       : ''}
   </section>`
+}
+
+function decidedBadge(a) {
+  if (a.status === 'rejected') return html`<span class="badge badge-rejected">Rejected</span>`
+  if (a.by === 'claude') return html`<span class="badge badge-member">${icon('sparkles')} Accepted by Claude</span>`
+  return html`<span class="badge badge-member">${icon('check')} Accepted</span>`
 }
 
 const decideAttrs = (item, a, status) => html`data-action="decide" data-id="${item.id}" data-app="${a.id}" data-status="${status}"`
@@ -70,7 +120,7 @@ function applicationCard(item, a) {
   return html`<li class="application" data-testid="application-${a.id}">
     <div class="application-head">
       <p class="application-name">${a.name}</p>
-      <p class="application-meta">${a.place ? `${a.place} · ` : ''}${a.when}</p>
+      <p class="application-meta">${[a.place, a.hours && `${a.hours} a week`, a.when].filter(Boolean).join(' · ')}</p>
     </div>
     <p class="mini-label">Application</p>
     <p class="application-text">${a.text}</p>
@@ -78,7 +128,7 @@ function applicationCard(item, a) {
     <p class="application-about">${a.about || html`<span class="muted">Left empty.</span>`}</p>
     ${screenBox(a)}
     <div class="application-actions">
-      <button class="btn btn-primary btn-small" type="button" ${decideAttrs(item, a, 'accepted')} data-testid="accept-application">${icon('check')} Accept</button>
+      <button class="btn btn-outline btn-small" type="button" ${decideAttrs(item, a, 'accepted')} data-testid="accept-application">${icon('check')} Accept</button>
       <button class="btn btn-secondary btn-small" type="button" ${decideAttrs(item, a, 'rejected')} data-testid="reject-application">Reject</button>
     </div>
   </li>`
@@ -287,6 +337,15 @@ function freshId(list, prefix) {
 }
 
 export const manageActions = {
+  'claude-setting'({ id, on }) {
+    const item = findItem(id)
+    const value = Boolean(on)
+    if (Boolean(item.claudeAccepts) === value) return
+    editing = null
+    const accepted = setClaudeAccepts(item, value)
+    if (!value) toast('You now review every application.')
+    else toast(accepted.length ? `Claude now accepts clear cases. Accepted: ${accepted.join(', ')}.` : 'Claude now accepts clear cases.')
+  },
   decide({ id, app, status }) {
     const item = findItem(id)
     const application = applicationsFor(item).find((a) => a.id === app)
@@ -330,6 +389,15 @@ export const manageActions = {
 }
 
 export const manageForms = {
+  expectations(data, { id }) {
+    findItem(id).expectations = data
+      .get('expectations')
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n\n')
+    changed('Saved. Applicants see it when they apply, and Claude checks new applications against it.')
+  },
   description(data, { id }) {
     findStream(id).description = data
       .get('description')

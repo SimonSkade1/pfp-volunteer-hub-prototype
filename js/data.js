@@ -45,8 +45,10 @@ export const LUMA = 'https://luma.com/pfp' // PFP's events calendar, linked on p
 // A stream's tasks are an individual pipeline: the same steps for everyone, each volunteer marks their own progress.
 // A task's `action` is one of {href} (real page), {mock} (not part of the prototype), {copy} (text to copy), {route}.
 // A resource without `href` is mock.
+// `expectations`: the lead's text on the apply page (Spec 7.1), editable in the lead view: paragraphs split by an empty
+// line, links written [label](https://…).
 // For the lead view (Spec 21): `members` (everyone in the stream: `steps` = how many of its steps, from the first,
-// they did; see below the list) and `applications` (as in groups, see there).
+// they did; see below the list), `applications` and `claudeAccepts` (as in groups, see there).
 export const streams = [
   {
     id: 'getting-started',
@@ -135,6 +137,7 @@ export const streams = [
     expectations:
       `Attend one of our town hall workshops first (online, 90 minutes): how to find a town hall, what to ask, and how to handle the answer. The next ones are on Sat Nov 7, 1 pm ET and Tue Nov 10, 7 pm ET, on [our Luma calendar](${LUMA}). In your application, tell me which workshop you attended or will attend.`,
     applyPlaceholder: 'e.g. I’m signed up for the workshop on Nov 7, and a friend wants to come along to town halls.',
+    claudeAccepts: false,
     commitmentText: 'I can commit to this: about 4 hours a month until January.',
     tasks: [
       {
@@ -211,6 +214,7 @@ export const streams = [
         when: '2 days ago',
         text: 'I’m signed up for the workshop on Nov 7. My congressman holds a town hall in Mesa on Nov 14, and I want to ask him where he stands on a treaty.',
         about: 'Retired middle school teacher and grandmother of four. My grandkids use AI for everything, and nobody seems to be in charge of where it’s going.',
+        hours: '2–5 hours',
         screen: 'accept',
         reasons: ['Signed up for the Nov 7 workshop, as you ask.', 'Has already found a town hall: Mesa, Nov 14.'],
         status: 'pending',
@@ -222,6 +226,7 @@ export const streams = [
         when: 'Yesterday',
         text: 'I work nights, so I can’t make either workshop. But I’ve spoken up at plenty of town halls as a union steward, so I know how they run.',
         about: 'Union steward at a warehouse. I worry about what happens when AI can do every job, including building the next AI.',
+        hours: '1–2 hours',
         screen: 'review',
         reasons: ['Can’t attend a workshop, which you ask for.', 'Has spoken at town halls before. The workshop recording might be enough.'],
         status: 'pending',
@@ -233,6 +238,7 @@ export const streams = [
         when: '3 hours ago',
         text: 'Make $5,000 a week with our AI trading bot!!! Limited spots, join now at ai-profit-signals.biz',
         about: '',
+        hours: 'Over 10 hours',
         screen: 'spam',
         reasons: ['Advertises a trading bot and links to it.', 'Says nothing about town halls, and the profile is empty.'],
         status: 'pending',
@@ -255,6 +261,7 @@ export const streams = [
     expectations:
       'Tell me which paper you’d like to write for and your angle, in a sentence or two. Rough ideas are fine; we shape them together.',
     applyPlaceholder: 'e.g. The Ann Arbor News. I’m a teacher and want to write about the world my students will grow up in.',
+    claudeAccepts: true,
     commitmentText: 'I can commit to this: a few hours in the next two weeks.',
     tasks: [
       {
@@ -313,9 +320,11 @@ export const streams = [
         when: '3 days ago',
         text: 'The Oregonian, or the Portland Tribune if that’s too big. I’m an ER nurse: every new drug is tested for years before patients get it, and AI companies release whatever they build.',
         about: 'ER nurse in Portland. I read If Anyone Builds It, Everyone Dies over the summer and haven’t stopped thinking about it.',
+        hours: '1–2 hours',
         screen: 'accept',
         reasons: ['Names her paper and her angle, as you ask.', 'A strong personal angle: a nurse on safety testing.'],
-        status: 'pending',
+        status: 'accepted',
+        by: 'claude',
       },
       {
         id: 'rick',
@@ -324,6 +333,7 @@ export const streams = [
         when: 'Yesterday',
         text: 'The Dallas Morning News. I want to write about AI taking our jobs and why we should tax the robots.',
         about: 'Small business owner, two kids. AI is going to wipe out half the jobs in my town.',
+        hours: 'Under 1 hour',
         screen: 'review',
         reasons: ['Names his paper, as you ask.', 'His angle is jobs and a robot tax, not superintelligence and a treaty: he may need steering.'],
         status: 'pending',
@@ -339,9 +349,12 @@ for (const stream of streams)
 
 // A local group's project is a team project: people claim different tasks. Members are in it by default.
 // A team task's `owner` is the member who claimed it (or null); the volunteer's own claims live in state.js.
-// `applications` (streams have them too): mock applications for the lead view (Spec 21), each with Claude's pre-screen
-// (Spec 14): `screen` 'accept' | 'review' | 'spam' and its `reasons`. `status` 'pending' | 'accepted' | 'rejected'
-// changes in place when the lead decides.
+// `applications` (streams have them too): mock applications for the lead view (Spec 21), each with the applicant's
+// profile (`place`, `about`, `hours` a week: Spec 5.1) and Claude's pre-screen (Spec 14): `screen` 'accept' | 'review'
+// | 'spam' and its `reasons`. `status` 'pending' | 'accepted' | 'rejected' changes in place when the lead decides;
+// `by: 'claude'` marks an application Claude accepted.
+// `claudeAccepts` (streams too): the lead's setting (Spec 14): false = "I review every application", true = "Claude
+// accepts clear cases, I review the rest": Claude then accepts the applications it rates Accept (state.js).
 export const groups = [
   {
     id: 'detroit',
@@ -362,6 +375,7 @@ export const groups = [
     expectations:
       'Tell us a little about yourself and which of our meetings you could make. Before your first meeting, I’ll invite you to a 15-minute video call to say hi.',
     applyPlaceholder: 'e.g. I live in Ann Arbor and could make most Thursday meetings, at least the ones on Zoom.',
+    claudeAccepts: false,
     projects: [
       {
         id: 'evening',
@@ -388,6 +402,7 @@ export const groups = [
         when: 'Yesterday',
         text: 'I’m a pharmacist in Dearborn and can make most Thursday meetings, in person too. I’d love to help with the community evening.',
         about: 'Pharmacist and mom. I want our representatives to take this seriously before it’s too late.',
+        hours: '2–5 hours',
         screen: 'accept',
         reasons: ['Lives in Dearborn, in your area.', 'Can make your Thursday meetings, as you ask.'],
         status: 'pending',
@@ -399,8 +414,9 @@ export const groups = [
         when: '2 days ago',
         text: 'I live in Toledo, about an hour from Royal Oak. Could I join on Zoom only? There’s no group in Ohio yet.',
         about: 'Retired engineer and Air Force veteran. AI is a national security problem, and I want to help.',
+        hours: '5–10 hours',
         screen: 'review',
-        reasons: ['Lives in Toledo, Ohio, about 70 miles away: outside your area.', 'Asks to join on Zoom only. He might be a good fit to start a group in Toledo.'],
+        reasons: ['Lives in Toledo, Ohio, about 70 miles away: outside your area.', 'Asks to join on Zoom only. With 5–10 hours a week, he might be a good fit to start a group in Toledo.'],
         status: 'pending',
       },
     ],

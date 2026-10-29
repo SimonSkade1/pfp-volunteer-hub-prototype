@@ -2,21 +2,23 @@
 
 A click-through prototype of the People for a Pause volunteer hub, for Ben and Felix to decide on the onboarding flow:
 the welcome email after the website signup → the one onboarding step (about you, hours a week) → the hub's main page
-(your groups and streams; join a local group; join a stream, Getting started last; "Want to do more?" → vacancies) →
-a stream's, group's or vacancy's page with Apply in its head → the apply page → pending → accepted (skip ahead) →
-the stream's steps or the group's task board, and a mock "Connect Discord". Profiles: yours from your initials in the
-top bar, a lead's from their name. A "View as: Volunteer | Lead" switch on stream and group pages opens the lead view:
-applications with Claude's pre-screen (accept / reject); for a stream, its members by step and an editor for its
-description, steps and resources; for a group, its task boards and a form for a new project. Front end only: mock data,
-no backend, nothing is sent; all people, numbers and dates are made up (real links are marked with an external-link
-icon).
+(your groups and streams; join a local group; join a stream, Getting started last; "Want to do more?" → vacancies) → a
+stream's, group's or vacancy's page with Apply in its head → the apply page → pending → accepted (skip ahead) → the
+stream's steps or the group's task board, and a mock "Connect Discord". Profiles: yours from your initials in the top
+bar, a lead's from their name. A "View as: Volunteer | Lead" switch on stream and group pages opens the lead view: the
+lead's expectations (editable; the apply page shows them) and who accepts applications ("I review every application" /
+"Claude accepts clear cases, I review the rest": Op-eds is set to Claude, Town halls and Detroit area to their leads);
+applications with the applicant's profile and hours, Claude's pre-screen and accept / reject, Claude's accepts marked
+and undoable; for a stream, its members by step and an editor for its description, steps and resources; for a group, its
+task boards and a form for a new project. Front end only: mock data, no backend, nothing is sent; all people, numbers
+and dates are made up (real links are marked with an external-link icon).
 
 Live: https://simonskade1.github.io/pfp-volunteer-hub-prototype/
 
 ## Demo state and reset
 
 The volunteer's progress (onboarding answers, what you joined or applied to, steps done, claimed tasks, the Discord
-connect) lives in the browser's `localStorage` under `pfp-volunteer-hub-prototype:v2` (bump the version in
+connect) lives in the browser's `localStorage` under `pfp-volunteer-hub-prototype:v3` (bump the version in
 `js/state.js` whenever the stored shape changes). A first visit starts at the welcome email. To start over:
 
 1. "Restart demo" in the black prototype bar at the top, or
@@ -24,11 +26,15 @@ connect) lives in the browser's `localStorage` under `pfp-volunteer-hub-prototyp
 
 "Skip ahead: … accepts you" (dashed, tagged *Demo*) on a pending stream or group stands in for the lead's acceptance;
 the lead view lists your application too, and accepting or rejecting it there changes your state the same way (after a
-rejection you can apply again). A vacancy you applied to stays "Application sent" (no acceptance in the demo).
+rejection you can apply again). Where the lead lets Claude accept clear cases (Op-eds, or any stream or group switched
+to it in the lead view), the apply page says so in a *Demo* line and you're in on submit: the demo counts every
+application as clear. Switching a stream or group to Claude accepts its waiting applications Claude rates Accept, yours
+too; the lead's Undo puts one back with the lead. A vacancy you applied to stays "Application sent" (no acceptance in
+the demo).
 
-The lead view's other changes (decisions on the made-up applicants, edits of a stream, new projects) are mock, as the
-spec says: they change the objects in `js/data.js` in place, so the volunteer side shows them at once, and a reload
-drops them. "Restart demo" is such a reload (`?reset=1`).
+The lead view's other changes (decisions on the made-up applicants, the expectations, the Claude setting, edits of a
+stream, new projects) are mock, as the spec says: they change the objects in `js/data.js` in place, so the volunteer
+side shows them at once, and a reload drops them. "Restart demo" is such a reload (`?reset=1`).
 
 ## Run and deploy
 
@@ -47,8 +53,8 @@ reload) sees the new version.
 
 | File | What it holds |
 |---|---|
-| `js/data.js` | **Data**: all mock content — the demo volunteer, the welcome email (same text as the vault note), `streams` (Getting started is `kind: 'start'`: joined in one click; Town halls and Op-eds are `kind: 'stream'`), `groups` with their team `projects`, `vacancies` (`kind: 'vacancy'`), the leads' profiles (`leads`, matched by name to an item's `lead`), `RADIUS_MI` (groups listed on the main page), `hoursOptions` (the onboarding's choice). A text may hold a link written `[label](https://…)` (Town halls' expectations link the Luma calendar); `richText` in `js/ui.js` renders it. For the lead view: every stream's and group's `members` and mock `applications` with Claude's pre-screen (`screen`: `accept` / `review` / `spam`, and `reasons`). Views read these objects on every render; the lead view changes them in place; nothing in here is persisted. |
-| `js/state.js` | **State**: the volunteer's progress in `localStorage` (`profile` {about, hours}, `joined`, `applications` for streams, groups and vacancies, `done`, `claims`, `discord`), selectors that combine it with the data (`membership`, `progress`, `memberCount`, `teamTask`, and for the lead view `applicationsFor`, `membersByStep`) and the actions that change it. `update(fn)` saves and re-renders; `rerender()` only re-renders (after the lead view's in-place edits). |
+| `js/data.js` | **Data**: all mock content — the demo volunteer, the welcome email (same text as the vault note), `streams` (Getting started is `kind: 'start'`: joined in one click; Town halls and Op-eds are `kind: 'stream'`), `groups` with their team `projects`, `vacancies` (`kind: 'vacancy'`), the leads' profiles (`leads`, matched by name to an item's `lead`), `RADIUS_MI` (groups listed on the main page), `hoursOptions` (the onboarding's choice). A text may hold a link written `[label](https://…)` (Town halls' expectations link the Luma calendar); `richText` in `js/ui.js` renders it, `richParagraphs` a text of paragraphs split by an empty line (the expectations). For the lead view: every stream's and group's `members`, `claudeAccepts` (the lead's setting: `true` = Claude accepts clear cases) and mock `applications` with the applicant's profile (`place`, `about`, `hours`), Claude's pre-screen (`screen`: `accept` / `review` / `spam`, and `reasons`) and `status` (`by: 'claude'` where Claude accepted it). Views read these objects on every render; the lead view changes them in place; nothing in here is persisted. |
+| `js/state.js` | **State**: the volunteer's progress in `localStorage` (`profile` {about, hours}, `joined`, `applications` for streams, groups and vacancies, each {status, text, by}, `done`, `claims`, `discord`), selectors that combine it with the data (`membership`, `progress`, `memberCount`, `teamTask`, and for the lead view `applicationsFor`, `membersByStep`) and the actions that change it (`apply` accepts at once where `claudeAccepts`; `setClaudeAccepts` is the lead's setting). `update(fn)` saves and re-renders; `rerender()` only re-renders (after the lead view's in-place edits). |
 | `js/views/*.js` | **Views**: one function per screen, returning HTML (`email`, `onboarding`, `home` = main page and the shared card pieces, `stream` = stream and task pages plus the page head's title row with Apply / Join, the pending box and the Discord button, `group`, `apply` = the apply page of a stream, group or vacancy, `vacancies` = the vacancies page and a vacancy's page, `profile` = yours and a lead's, `manage` = the lead view of a stream or group, with its own click and submit handlers and the open-editor state, `layout` = prototype bar, sticky top bar, page frame, back link row and the view switch). |
 | `js/app.js` | Boot and wiring: hash route → view, re-render on route or state change, and two delegated handlers: clicks on `[data-action]` (the `actions` object, plus `manageActions`) and submits of `form[data-form]` (the `forms` object, plus `manageForms`). |
 | `js/router.js` | Hash routes (`#/email`, `#/welcome` = onboarding, `#/hub` = main page, `#/s/<stream>`, `#/s/<stream>/<task>`, `#/g/<group>`, `#/vacancies`, `#/v/<vacancy>`, `#/apply/<stream, group or vacancy>`, `#/me` = your profile, `#/p/<lead id>` = a lead's, `#/manage/<stream or group>` = the lead view) and the `href` helpers. |
@@ -78,13 +84,15 @@ the page), `me` (your initials), `home`, `back`, `toast`, `restart-demo`. Pages:
 step titles before you're in), `task-list` with `step-<task>`, `discord-line` with `discord-connect` / `discord-open`,
 `resources`, `about`; the task page `task-<task>` with `task-action`, `mark-done`, `task-done`, `next-step`,
 `undo-done`; a group's `project-<id>` with `team-task-<task>` (`claim` / `claim-done` / `unclaim` / `reopen` inside)
-and `members`; the apply page `apply-form` / `expectations` / `apply-text` / `apply-commit` / `apply-submit`;
+and `members`; the apply page `apply-form` / `expectations` / `apply-text` / `apply-commit` / `apply-submit` /
+`claude-accepts` (the Demo line where Claude accepts on submit);
 `vacancies`; `profile-me`, `profile-<lead id>`.
 
-Lead view: `view-volunteer` / `view-lead` (the switch), `manage-<id>`, `application-<id>` (yours: `application-you`)
-with `accept-application` / `reject-application` inside, `decided-<id>` with `undo-decision`, `funnel-<task>` and
-`funnel-done` (members by step), `description-edit` / `description-text`, `add-step`, `edit-step-<task>` with `step-up`
-/ `step-down` / `step-edit` / `step-remove`, `step-title` / `step-time` / `step-summary` / `step-howto`, `add-resource`,
-`edit-resource-<index>` with `resource-edit` / `resource-remove`, `resource-title` / `resource-type` / `resource-note` /
-`resource-link`, `create-project`, `project-name` / `project-description` / `project-tasks`, `project-<id>` (a task
-board), and `edit-save` / `edit-cancel` in every editor.
+Lead view: `view-volunteer` / `view-lead` (the switch), `manage-<id>`, `edit-expectations` with `expectations-edit` /
+`expectations-text`, `claude-setting` with `setting-lead` / `setting-claude` (each a label around its radio),
+`application-<id>` (yours: `application-you`) with `accept-application` / `reject-application` inside, `decided-<id>`
+with `undo-decision`, `funnel-<task>` and `funnel-done` (members by step), `description-edit` / `description-text`,
+`add-step`, `edit-step-<task>` with `step-up` / `step-down` / `step-edit` / `step-remove`, `step-title` / `step-time` /
+`step-summary` / `step-howto`, `add-resource`, `edit-resource-<index>` with `resource-edit` / `resource-remove`,
+`resource-title` / `resource-type` / `resource-note` / `resource-link`, `create-project`, `project-name` /
+`project-description` / `project-tasks`, `project-<id>` (a task board), and `edit-save` / `edit-cancel` in every editor.

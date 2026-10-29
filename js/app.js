@@ -141,9 +141,11 @@ const forms = {
     completeOnboarding({ about: data.get('about').trim(), hours: data.get('hours') })
   },
   apply(data, { id }) {
-    navigate(href.item(findItem(id)))
-    apply(id, data.get('text').trim())
-    toast('Application sent.')
+    const item = findItem(id)
+    navigate(href.item(item))
+    if (!apply(id, data.get('text').trim())) toast('Application sent.')
+    else if (state.discord) toast(`You’re in! Claude accepted your application, and ${item.discord} on our Discord is open to you now.`)
+    else toast('You’re in! Claude accepted your application.')
   },
   ...manageForms, // the lead view's
 }

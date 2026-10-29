@@ -56,7 +56,10 @@ def run(browser, name, options):
         # Spec 18: a member sees the steps first, so that on a phone the next step, with its Start, is in the first
         # screen.
         page.evaluate("window.scrollTo(0, 0)")
-        box = tid(test_id).locator(".step-cta").bounding_box()
+        cta = tid(test_id).locator(".step-cta")
+        expect(cta).to_be_visible()
+        page.wait_for_timeout(150)  # after a submit that navigates, the page renders once more (on hashchange)
+        box = cta.bounding_box()
         assert box["y"] + box["height"] <= page.viewport_size["height"], f"{test_id}'s Start is below the first screen"
 
     def apply(text, commit=False):
@@ -111,6 +114,7 @@ def run(browser, name, options):
     tid("back").click()
     apply("I'm signed up for the workshop on Nov 7.", commit=True)
     expect(tid("expectations").get_by_role("link", name="our Luma calendar")).to_have_attribute("href", "https://luma.com/pfp")
+    expect(tid("claude-accepts")).to_have_count(0)  # Dana reviews every application
     shot("apply-town-halls")
     tid("apply-submit").click()
     expect(tid("pending-box")).to_be_visible()
@@ -160,12 +164,16 @@ def run(browser, name, options):
     expect(tid("step-question")).to_have_class(NEXT)
     shot("town-halls-next")
 
-    # Op-eds: apply, accepted, its steps above its resources.
+    # Op-eds, where Sam lets Claude accept clear cases (Spec 14, 21): the apply page says so (Demo), and you're in on
+    # submit, no pending; its steps above its resources.
     home()
     open_card("op-eds")
     apply("The Ann Arbor News, as a teacher.", commit=True)
+    expect(tid("claude-accepts")).to_contain_text("you’re in on submit")
+    shot("apply-op-eds")
     tid("apply-submit").click()
-    tid("accept-demo").click()
+    expect(tid("toast")).to_contain_text("Claude accepted your application")
+    expect(tid("pending-box")).to_have_count(0)
     expect(tid("resources")).to_be_visible()
     in_first_screen("step-pick")
     shot("op-eds-accepted")
@@ -183,13 +191,24 @@ def run(browser, name, options):
     open_card("detroit")
     tid("view-lead").click()
     expect(tid("application-you")).to_contain_text("I live in Ann Arbor")
+    expect(tid("application-you")).to_contain_text("2–5 hours a week")  # your hours, from your onboarding
+    expect(tid("setting-lead").locator("input")).to_be_checked()  # Maya reviews every application
     shot("lead-view-your-application")
     tid("application-you").get_by_test_id("reject-application").click()
     expect(tid("decided-you")).to_contain_text("Rejected")
+    # The lead edits the expectations (mock, Spec 7.1, 21): the apply page shows the new text.
+    tid("expectations-edit").click()
+    expect(tid("expectations-text")).to_be_focused()
+    tid("expectations-text").fill("Tell us which of our Thursday meetings you could make.\n\nEdited in the lead view.")
+    tid("edit-save").click()
+    expect(tid("edit-expectations")).to_contain_text("Edited in the lead view.")
     tid("view-volunteer").click()
     expect(tid("rejected-note")).to_be_visible()
     shot("group-rejected")
     apply("I live in Ann Arbor and could make most Thursday meetings, at least the ones on Zoom.")
+    expect(tid("expectations").locator("p")).to_have_count(2)
+    expect(tid("expectations")).to_contain_text("Edited in the lead view.")
+    shot("apply-group-edited")
     tid("apply-submit").click()
     tid("accept-demo").click()
     expect(tid("project-evening")).to_be_visible()
@@ -229,6 +248,9 @@ def run(browser, name, options):
     open_card("town-halls")
     tid("view-lead").click()
     expect(tid("manage-town-halls")).to_be_visible()
+    expect(tid("edit-expectations").get_by_role("link", name="our Luma calendar")).to_have_attribute("href", "https://luma.com/pfp")
+    expect(tid("setting-lead").locator("input")).to_be_checked()
+    expect(tid("application-maria")).to_contain_text("2–5 hours a week")
     expect(tid("application-signals")).to_contain_text("Spam")
     shot("lead-view-town-halls")
     tid("application-maria").get_by_test_id("accept-application").click()
@@ -271,6 +293,27 @@ def run(browser, name, options):
     expect(tid("resources")).to_contain_text("Sample question on video")
     expect(tid("resources")).not_to_contain_text("Town hall guide")
     shot("town-halls-after-edits")
+
+    # The lead view where Claude accepts clear cases (Op-eds): Claude's accepts are in and marked, the lead can undo
+    # them, and the setting switches in one click.
+    home()
+    open_card("op-eds")
+    tid("view-lead").click()
+    expect(tid("setting-claude").locator("input")).to_be_checked()
+    expect(tid("decided-you")).to_contain_text("Accepted by Claude")
+    expect(tid("decided-helen")).to_contain_text("Accepted by Claude")
+    expect(tid("application-rick")).to_contain_text("Under 1 hour a week")
+    shot("lead-view-op-eds")
+    tid("decided-helen").get_by_test_id("undo-decision").click()
+    expect(tid("application-helen")).to_contain_text("Claude’s pre-screen: Accept")  # back with the lead
+    tid("setting-lead").click()
+    expect(tid("toast")).to_contain_text("You now review every application")
+    expect(tid("setting-lead").locator("input")).to_be_checked()
+    expect(tid("decided-you")).to_contain_text("Accepted by Claude")  # those in stay in
+    tid("setting-claude").click()
+    expect(tid("toast")).to_contain_text("Accepted: Helen Park")
+    expect(tid("decided-helen")).to_contain_text("Accepted by Claude")
+    shot("lead-view-op-eds-claude", full=False)
 
     # The lead view of a local group: applications, the task board, a new project.
     home()

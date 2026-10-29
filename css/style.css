@@ -2,8 +2,9 @@
    Red and blue in balance within every screenful (Spec 23.1; check: scripts/color_balance.py):
    - the sticky top bar carries both, in its ribbon;
    - a page head pairs its navy title with a red eyebrow chip, and with the red call to action beside it;
-   - red marks what you can do (primary buttons, call-to-action links, a card's arrow, the next step), blue where you
-     are and what things are (titles, badges, tags, progress and done marks, icons, links, secondary buttons);
+   - red marks what you can do (primary buttons, call-to-action links, a card's arrow, the next step, the setting we
+     recommend), blue where you are and what things are (titles, badges, tags, progress and done marks, icons, links,
+     secondary buttons);
    - avatars, section titles and body text are ink. */
 
 @font-face {
@@ -261,7 +262,8 @@ select {
 }
 
 .link,
-.lead a {
+.lead a,
+.prose a {
   color: var(--blue);
   font-weight: 600;
 }
@@ -593,7 +595,7 @@ select {
   background: var(--blue-tint);
 }
 
-/* A repeated action in a list (Claim on a task board): red, but light. */
+/* A repeated action in a list (Claim on a task board, Accept on an application): red, but light. */
 .btn-outline {
   background: #fff;
   border-color: var(--red);
@@ -909,6 +911,10 @@ select {
   line-height: 1.5;
 }
 
+.expectations p + p {
+  margin-top: 10px;
+}
+
 .expectations a {
   color: var(--blue);
   font-weight: 600;
@@ -967,6 +973,17 @@ select {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px dashed #9a9b9f;
+}
+
+/* A Demo-tagged line at the end of a form: the apply page where Claude accepts on submit */
+.demo-line {
+  padding-top: 16px;
+  border-top: 1px dashed #9a9b9f;
+  font-size: 15px;
+}
+
+.demo-line .demo-tag {
+  margin-right: 6px;
 }
 
 .demo-tag {
@@ -1456,6 +1473,52 @@ textarea::placeholder {
   color: var(--ink);
 }
 
+/* Who accepts applications (Spec 14): a plain radio list, one click switches */
+
+.setting {
+  display: grid;
+  gap: 4px;
+}
+
+.setting-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.setting-option input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.setting-option:has(input:checked) {
+  font-weight: 800;
+}
+
+.tag-nudge {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.tag-small {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-width: 1.5px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
 /* Applications */
 
 .applications {
@@ -1582,8 +1645,9 @@ textarea::placeholder {
 
 .decided li {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 4px 12px;
   padding: 8px 16px;
 }
 
@@ -1592,7 +1656,7 @@ textarea::placeholder {
 }
 
 .decided-name {
-  flex: 1;
+  flex: 1 1 160px; /* a phone: the name on its own line when the badge is long */
   min-width: 0;
   font-weight: 700;
 }
@@ -1602,6 +1666,13 @@ textarea::placeholder {
   border: 2px solid var(--red);
   background: #fff;
   color: var(--red-deep);
+}
+
+/* In the list of decided applications the status is a word, not a box: a few blue boxes in a row tip a screenful. */
+.decided .badge {
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 /* Members by step (a stream) */

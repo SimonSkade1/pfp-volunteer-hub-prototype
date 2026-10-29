@@ -3,13 +3,14 @@
 
 import { findItem, volunteer } from './data.js'
 
-const KEY = 'pfp-volunteer-hub-prototype:v2' // bump when the stored shape changes: old state is dropped
+const KEY = 'pfp-volunteer-hub-prototype:v3' // bump when the stored shape changes: old state is dropped
 
 const seed = () => ({
   onboarded: false,
   profile: { about: '', hours: '' }, // the onboarding step (Spec 5); your profile shows it
   joined: {}, // id -> true: what you joined without an application (Getting started)
-  applications: {}, // stream, group or vacancy id -> { status: 'pending' | 'accepted' | 'rejected', text }
+  applications: {}, // stream, group or vacancy id -> { status: 'pending' | 'accepted' | 'rejected', text, by }
+  // (by: 'claude' where Claude accepted it, Spec 14)
   done: {}, // 'streamId/taskId' -> true: your own progress in a stream's pipeline
   claims: {}, // 'groupId/projectId/taskId' -> 'claimed' | 'done': team tasks you took
   discord: false, // the mock "Connect Discord" (Spec 22): once connected, channel lines offer "Open"
@@ -131,6 +132,7 @@ export function applicationsFor(item) {
     screen: 'demo',
     reasons: [],
     status: own.status,
+    by: own.by,
     you: true,
   }
   return [yours, ...item.applications]
@@ -153,25 +155,52 @@ export function membersByStep(stream) {
   return rows
 }
 
-// The lead accepts or rejects an application, or undoes that (status 'pending'). Yours is your own progress and is
-// saved; a mock one changes data.js in place, until a reload.
+// The lead accepts or rejects an application, or undoes that (status 'pending'), also Claude's accept. Yours is your
+// own progress and is saved; a mock one changes data.js in place, until a reload.
 export function setApplicationStatus(item, applicationId, status) {
+  const decide = (application) => {
+    application.status = status
+    delete application.by // the lead's decision from now on
+  }
   if (applicationId === 'you') {
-    update((s) => {
-      s.applications[item.id].status = status
-    })
+    update((s) => decide(s.applications[item.id]))
     return
   }
-  item.applications.find((a) => a.id === applicationId).status = status
+  decide(item.applications.find((a) => a.id === applicationId))
   rerender()
+}
+
+// The lead's setting (Spec 14): "I review every application" (off) or "Claude accepts clear cases, I review the rest"
+// (on). Switched on, Claude accepts the waiting applications it rates Accept, yours too: the demo counts yours as clear
+// (Spec 21). Mock, like the lead's other edits; yours is saved. Returns the names of those Claude accepted.
+export function setClaudeAccepts(item, on) {
+  item.claudeAccepts = on
+  const names = []
+  if (on)
+    for (const application of item.applications)
+      if (application.status === 'pending' && application.screen === 'accept') {
+        Object.assign(application, { status: 'accepted', by: 'claude' })
+        names.push(application.name)
+      }
+  update((s) => {
+    const own = s.applications[item.id]
+    if (!on || own?.status !== 'pending') return
+    Object.assign(own, { status: 'accepted', by: 'claude' })
+    names.unshift(`${volunteer.name} (you)`)
+  })
+  return names
 }
 
 // ---- Actions ----
 
+// Pending, or, where the lead lets Claude accept clear cases (Spec 14, 21), in at once: the demo counts every
+// application as clear. Returns true when Claude accepted it.
 export function apply(id, text) {
+  const byClaude = Boolean(findItem(id).claudeAccepts)
   update((s) => {
-    s.applications[id] = { status: 'pending', text }
+    s.applications[id] = byClaude ? { status: 'accepted', text, by: 'claude' } : { status: 'pending', text }
   })
+  return byClaude
 }
 
 export function accept(id) {

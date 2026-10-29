@@ -71,6 +71,12 @@ export function richText(text) {
   return raw(out)
 }
 
+// A text of paragraphs split by an empty line, each a richText: a lead's expectations.
+export const richParagraphs = (text) =>
+  String(text)
+    .split(/\n\s*\n/)
+    .map((paragraph) => html`<p>${richText(paragraph)}</p>`)
+
 export const crumb = (to, label) => html`<a class="crumb" href="${to}" data-testid="back">${icon('left')} ${label}</a>`
 
 // A stream's or group's membership (state.js); 'sent' is an application to a vacancy.

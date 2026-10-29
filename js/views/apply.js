@@ -1,11 +1,12 @@
 // The apply page (Spec 7, 17), shared by streams, groups and vacancies. A stream or group: the lead's expectations
-// text and a text field; streams also ask you to state that you can commit (Spec 7.2). A vacancy (Spec 17.4): one
-// field, why you'd be a good fit.
+// text (as the lead view last saved it) and a text field; streams also ask you to state that you can commit (Spec 7.2).
+// Where the lead lets Claude accept clear cases (Spec 14, 21), a Demo-tagged line says you're in on submit. A vacancy
+// (Spec 17.4): one field, why you'd be a good fit.
 
-import { findItem } from '../data.js'
+import { findItem, firstName } from '../data.js'
 import { href } from '../router.js'
 import { membership } from '../state.js'
-import { crumb, html, richText } from '../ui.js'
+import { crumb, html, richParagraphs } from '../ui.js'
 import { hubPage } from './layout.js'
 import { notFound } from './stream.js'
 
@@ -31,9 +32,9 @@ export function applyView(id) {
     ${isVacancy
       ? ''
       : html`<section class="block">
-          <h2 class="block-title">What ${item.lead.split(' ')[0]} expects from you</h2>
+          <h2 class="block-title">What ${firstName(item.lead)} expects from you</h2>
           <blockquote class="expectations" data-testid="expectations">
-            <p>${richText(item.expectations)}</p>
+            ${richParagraphs(item.expectations)}
             <footer>${item.lead}, ${item.kind === 'group' ? 'group lead' : 'stream lead'}</footer>
           </blockquote>
         </section>`}
@@ -52,6 +53,9 @@ export function applyView(id) {
         <button class="btn btn-primary" type="submit" data-testid="apply-submit">Send application</button>
         <a class="btn btn-link" href="${href.item(item)}">Cancel</a>
       </div>
+      ${item.claudeAccepts
+        ? html`<p class="demo-line" data-testid="claude-accepts"><span class="demo-tag">Demo</span> ${firstName(item.lead)} lets Claude accept clear cases, and the demo counts yours as clear: you’re in on submit.</p>`
+        : ''}
     </form>
   `)
 }
