@@ -13,7 +13,7 @@ export function parseRoute(hash) {
     case 's':
       return c ? { name: 'task', streamId: b, taskId: c } : { name: 'stream', id: b }
     case 'g':
-      return { name: 'group', id: b }
+      return c ? { name: 'project', groupId: b, projectId: c } : { name: 'group', id: b }
     case 'vacancies':
       return { name: 'vacancies' }
     case 'v':
@@ -25,7 +25,7 @@ export function parseRoute(hash) {
     case 'p':
       return { name: 'person', id: b } // a lead's profile
     case 'manage':
-      return { name: 'manage', id: b } // the lead view of a stream or group
+      return { name: 'manage', id: b, projectId: c } // the lead view of a stream or group, or of a group's project
     default:
       return { name: 'start' } // no route: the email on a first visit, else the hub
   }
@@ -38,13 +38,14 @@ export const href = {
   stream: (id) => `#/s/${id}`,
   task: (streamId, taskId) => `#/s/${streamId}/${taskId}`,
   group: (id) => `#/g/${id}`,
+  project: (groupId, projectId) => `#/g/${groupId}/${projectId}`,
   vacancies: '#/vacancies',
   vacancy: (id) => `#/v/${id}`,
   item: (item) => `#/${{ group: 'g', vacancy: 'v' }[item.kind] ?? 's'}/${item.id}`, // a stream, group or vacancy
   apply: (id) => `#/apply/${id}`,
   me: '#/me',
   person: (id) => `#/p/${id}`,
-  manage: (id) => `#/manage/${id}`,
+  manage: (id, projectId) => `#/manage/${id}${projectId ? `/${projectId}` : ''}`,
 }
 
 export function navigate(to) {

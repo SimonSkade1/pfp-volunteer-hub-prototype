@@ -1,7 +1,8 @@
 // A stream's page (Spec 18). Before you're in: Apply in the page head (Getting started: Join), then the description
-// and the step titles; the lead's expectations show on the apply page. Once you're in: your steps first, so that on a
-// phone the next step is in the first screen (Spec 19: the same steps for everyone, each marks their own progress),
-// then the Discord channel, the resources and the description.
+// and the step titles; the lead's expectations show on the apply page. Once you're in: until you connect Discord, its
+// call to action in the page head (round 4); then your steps, so that on a phone the next step is in the first screen
+// once Discord is connected (Spec 19: the same steps for everyone, each marks their own progress), then the Discord
+// channel, the resources and the description.
 // The task page: the how-to of one step, which you can mark done; the stream page then shows the next one.
 // A stream's page has the demo's switch to its lead view (views/manage.js); Getting started has no lead.
 
@@ -19,7 +20,7 @@ export function streamView(id) {
 
   const body =
     status === 'member'
-      ? html`${taskList(stream)}${stream.discord ? discordLine(stream) : ''}${resourceList(stream)}
+      ? html`${taskList(stream)}${stream.discord && state.discord ? discordLine(stream) : ''}${resourceList(stream)}
           <section class="block" data-testid="about"><h2 class="block-title">About ${stream.title}</h2>${paragraphs(stream.description)}</section>`
       : html`${paragraphs(stream.description)}${preview(stream)}`
 
@@ -63,9 +64,11 @@ export function headRow(item, status) {
   return html`<div class="head-row"><h1>${item.title} ${statusBadge(status)}</h1>${cta}</div>`
 }
 
-// Below the head's meta: the pending box once you've applied, or a note after a rejection (you can apply again).
+// Below the head's meta: the pending box once you've applied, or a note after a rejection (you can apply again); once
+// you're in, Discord's call to action until you connect.
 export function headStatus(item, status) {
   if (status === 'pending') return pendingBox(item)
+  if (status === 'member') return item.discord && !state.discord ? discordCta(item) : ''
   if (state.applications[item.id]?.status === 'rejected')
     return html`<p class="rejected-note" data-testid="rejected-note">${firstName(item.lead)} didn’t accept your last application. You can apply again.</p>`
   return ''
@@ -140,12 +143,18 @@ function discordLine(item) {
   </div>`
 }
 
-// The mock Discord (Spec 22): "Connect Discord" once you're accepted; after one connect, every channel line offers
-// "Open".
+// The mock Discord (Spec 22). Once you're accepted, the first thing on the page, a must (round 4): Discord's own
+// button, "Connect Discord". After one connect, the page shows its channel line instead (a stream's below the steps, a
+// group's beside the next meeting), with "Open".
+function discordCta(item) {
+  return html`<section class="discord-cta" data-testid="discord-cta">
+    <p class="discord-cta-text">Before you start: join <strong>${item.discord}</strong> on our Discord.</p>
+    <button class="btn btn-discord" type="button" data-action="connect-discord" data-channel="${item.discord}" data-testid="discord-connect">${icon('discord')} Connect Discord</button>
+  </section>`
+}
+
 export function discordButton(item) {
-  if (state.discord)
-    return html`<button class="btn btn-secondary btn-small" type="button" data-action="mock" data-msg="This would open ${item.discord} on our Discord." data-testid="discord-open">Open</button>`
-  return html`<button class="btn btn-secondary btn-small" type="button" data-action="connect-discord" data-channel="${item.discord}" data-testid="discord-connect">Connect Discord</button>`
+  return html`<button class="btn btn-secondary btn-small" type="button" data-action="mock" data-msg="This would open ${item.discord} on our Discord." data-testid="discord-open">Open</button>`
 }
 
 // Before you're in: the steps you'd take, without progress.

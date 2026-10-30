@@ -36,17 +36,18 @@ export function pageTop(to, label, extra = '') {
   return html`<div class="page-top">${crumb(to, label)}${extra}</div>`
 }
 
-// The demo's switch between a stream's or group's page as volunteers see it and its lead view (Spec 21). In the hub,
-// only the lead would have it. "Lead" shows how many applications wait for a decision.
-export function viewSwitch(item, active) {
-  const waiting = applicationsFor(item).filter((a) => a.status === 'pending').length
+// The demo's switch between a stream's or group's page as volunteers see it and its lead view (Spec 21), or, with a
+// group's `project`, between that project's two pages. In the hub, only the lead would have it. On a stream's or
+// group's page, "Lead" shows how many applications wait for a decision.
+export function viewSwitch(item, active, project = null) {
+  const waiting = project ? 0 : applicationsFor(item).filter((a) => a.status === 'pending').length
   const segment = (name, to, label) =>
     html`<a class="seg ${name === active ? 'is-active' : ''}" href="${to}" ${name === active ? raw('aria-current="page"') : ''} data-testid="view-${name}">${label}</a>`
   return html`<div class="view-switch" data-testid="view-switch">
     <span class="demo-tag">Demo</span>
     <span class="view-switch-label">View as</span>
     <span class="segs">
-      ${segment('volunteer', href.item(item), 'Volunteer')}${segment('lead', href.manage(item.id), html`Lead${waiting ? html`<span class="seg-count">${waiting}</span>` : ''}`)}
+      ${segment('volunteer', project ? href.project(item.id, project.id) : href.item(item), 'Volunteer')}${segment('lead', href.manage(item.id, project?.id), html`Lead${waiting ? html`<span class="seg-count">${waiting}</span>` : ''}`)}
     </span>
   </div>`
 }

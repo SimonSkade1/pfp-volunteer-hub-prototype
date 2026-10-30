@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Click through the demo path (Spec 17), volunteer side and lead view, and screenshot every screen at desktop and
-phone width.
+phone width. Round 4 added Discord's call to action, the Luma links and the projects' pages.
 
 Usage: scripts/walkthrough.py [url] [out_dir]
   url      default: the GitHub Pages site
@@ -52,15 +52,24 @@ def run(browser, name, options):
         tid("home").click()
         expect(tid("your-items")).to_be_visible()
 
-    def in_first_screen(test_id):
-        # Spec 18: a member sees the steps first, so that on a phone the next step, with its Start, is in the first
-        # screen.
+    def in_first_screen(locator, what):
         page.evaluate("window.scrollTo(0, 0)")
-        cta = tid(test_id).locator(".step-cta")
-        expect(cta).to_be_visible()
+        expect(locator).to_be_visible()
         page.wait_for_timeout(150)  # after a submit that navigates, the page renders once more (on hashchange)
-        box = cta.bounding_box()
-        assert box["y"] + box["height"] <= page.viewport_size["height"], f"{test_id}'s Start is below the first screen"
+        box = locator.bounding_box()
+        assert box["y"] + box["height"] <= page.viewport_size["height"], f"{what} is below the first screen"
+
+    def start_in_first_screen(test_id):
+        # Spec 18: a member sees the steps first (once Discord is connected), so that on a phone the next step, with its
+        # Start, is in the first screen.
+        in_first_screen(tid(test_id).locator(".step-cta"), f"{test_id}'s Start")
+
+    def luma_toast(scope):
+        # Round 4: a meeting's or workshop's Luma link looks real and opens the "not part of the prototype" toast.
+        link = tid(scope).get_by_test_id("luma-link").first
+        expect(link).to_contain_text("lu.ma/")
+        link.click()
+        expect(tid("toast")).to_contain_text("Not part of the prototype. This would open lu.ma/")
 
     def apply(text, commit=False):
         tid("apply").click()
@@ -113,12 +122,14 @@ def run(browser, name, options):
     shot("lead-profile")
     tid("back").click()
     apply("I'm signed up for the workshop on Nov 7.", commit=True)
-    expect(tid("expectations").get_by_role("link", name="our Luma calendar")).to_have_attribute("href", "https://luma.com/pfp")
+    expect(tid("workshops").get_by_test_id("luma-link")).to_have_count(2)  # the next workshops, under the expectations
+    luma_toast("workshops")
     expect(tid("claude-accepts")).to_have_count(0)  # Dana reviews every application
     shot("apply-town-halls")
     tid("apply-submit").click()
     expect(tid("pending-box")).to_be_visible()
     expect(tid("meanwhile")).to_be_visible()  # not in Getting started yet
+    expect(tid("discord-cta")).to_have_count(0)  # Discord only once you're in
     shot("town-halls-pending")
 
     # Getting started, from the pending box: Join (no form, no pending), the first action, done, the next one.
@@ -146,14 +157,22 @@ def run(browser, name, options):
     tid("accept-demo").click()
     expect(tid("task-list")).to_be_visible()
     expect(tid("step-find")).to_have_class(NEXT)
-    in_first_screen("step-find")
+    # The mock Discord (Spec 22; round 4): once you're in, Discord's own button in the page head, in the first screen,
+    # above the steps; the channel line below the steps only comes after the connect.
+    expect(tid("stream-town-halls").get_by_test_id("discord-cta")).to_be_visible()
+    expect(tid("discord-connect")).to_have_css("background-color", "rgb(88, 101, 242)")  # Discord's blurple
+    expect(tid("discord-connect").locator("svg")).to_have_count(1)  # its logo
+    expect(tid("discord-line")).to_have_count(0)
+    in_first_screen(tid("discord-connect"), "Connect Discord")
     shot("town-halls-accepted", full=False)  # the first screen
     shot("town-halls-accepted")
 
-    # The mock Discord (Spec 22): connect once, then channel lines offer Open.
+    # Connect once: the call to action goes, and channel lines offer Open.
     tid("discord-connect").click()
     expect(tid("toast")).to_contain_text("our bot would add you")
+    expect(tid("discord-cta")).to_have_count(0)
     expect(tid("discord-open")).to_be_visible()
+    start_in_first_screen("step-find")
     shot("discord-connected", full=False)
     tid("step-find").locator("a").click()
     expect(tid("task-find")).to_be_visible()
@@ -174,8 +193,9 @@ def run(browser, name, options):
     tid("apply-submit").click()
     expect(tid("toast")).to_contain_text("Claude accepted your application")
     expect(tid("pending-box")).to_have_count(0)
+    expect(tid("discord-cta")).to_have_count(0)  # connected before
     expect(tid("resources")).to_be_visible()
-    in_first_screen("step-pick")
+    start_in_first_screen("step-pick")
     shot("op-eds-accepted")
 
     # A local group: Apply in the head; your application rejected in the lead view; applied again; accepted.
@@ -211,18 +231,32 @@ def run(browser, name, options):
     shot("apply-group-edited")
     tid("apply-submit").click()
     tid("accept-demo").click()
-    expect(tid("project-evening")).to_be_visible()
-    expect(tid("discord-open")).to_be_visible()  # connected before
+    # Round 4: the next meeting with its Luma link; Team projects, a card per project, each opening the project's page
+    # with its task board.
+    expect(tid("team-projects").locator("[data-testid^=card-]")).to_have_count(2)
+    expect(tid("card-evening")).to_contain_text("4 open tasks")
+    expect(tid("card-evening")).to_contain_text("4 members")
+    expect(tid("team-task-flyer")).to_have_count(0)  # the board is on the project's page
+    expect(tid("discord-cta")).to_have_count(0)  # connected before
+    expect(tid("discord-open")).to_be_visible()
+    luma_toast("next-meeting")
     shot("group-member")
+    open_card("evening")
+    expect(tid("project-evening")).to_be_visible()
+    expect(tid("board")).to_contain_text("4 open tasks")
+    shot("project")
     tid("team-task-flyer").get_by_test_id("claim").click()
     expect(tid("team-task-flyer").get_by_test_id("claim-done")).to_be_visible()
-    shot("group-claimed")
+    shot("project-claimed")
     tid("team-task-flyer").get_by_test_id("claim-done").click()
     expect(tid("team-task-flyer")).to_have_class(re.compile(r"\bis-done\b"))
+    tid("back").click()
+    expect(tid("card-evening")).to_contain_text("3 open tasks")
+    expect(tid("card-evening")).to_contain_text("5 members")  # you claimed one of its tasks
 
     # The main page with everything joined: no group or stream left to join.
     home()
-    expect(tid("card-detroit")).to_be_visible()
+    expect(tid("card-detroit")).to_contain_text("5 open tasks in 2 projects")
     expect(tid("join-group")).to_have_count(0)
     expect(tid("join-stream")).to_have_count(0)
     shot("hub-joined")
@@ -248,7 +282,7 @@ def run(browser, name, options):
     open_card("town-halls")
     tid("view-lead").click()
     expect(tid("manage-town-halls")).to_be_visible()
-    expect(tid("edit-expectations").get_by_role("link", name="our Luma calendar")).to_have_attribute("href", "https://luma.com/pfp")
+    expect(tid("edit-expectations")).to_contain_text("Attend one of our town hall workshops first")
     expect(tid("setting-lead").locator("input")).to_be_checked()
     expect(tid("application-maria")).to_contain_text("2–5 hours a week")
     expect(tid("application-signals")).to_contain_text("Spam")
@@ -315,28 +349,45 @@ def run(browser, name, options):
     expect(tid("decided-helen")).to_contain_text("Accepted by Claude")
     shot("lead-view-op-eds-claude", full=False)
 
-    # The lead view of a local group: applications, the task board, a new project.
+    # The lead view of a local group: applications, the projects (a card opens the project's lead page, its board as
+    # the lead sees it), a new project.
     home()
     open_card("detroit")
     tid("view-lead").click()
     expect(tid("manage-detroit")).to_be_visible()
-    expect(tid("project-evening")).to_contain_text("Jordan Miller (you)")  # your claimed task
     shot("lead-view-detroit")
+    open_card("evening")
+    expect(tid("manage-evening")).to_be_visible()
+    expect(tid("board")).to_contain_text("Jordan Miller (you)")  # your claimed task
+    expect(tid("board").get_by_test_id("claim")).to_have_count(0)  # no claiming or assigning
+    shot("lead-view-project")
+    tid("view-volunteer").click()  # the switch keeps the project
+    expect(tid("project-evening")).to_be_visible()
+    tid("view-lead").click()
+    tid("back").click()
+    expect(tid("manage-detroit")).to_be_visible()
     tid("application-nadia").get_by_test_id("accept-application").click()
     expect(tid("decided-nadia")).to_contain_text("Accepted")
     tid("create-project").click()
     tid("project-name").fill("Tabling at the Royal Oak farmers market")
+    tid("project-summary").fill("Our table at the market, Sat Nov 21.")
     tid("project-description").fill("Sat Nov 21, 9-11 am. Goal: 15 sign-ups.")
     tid("project-tasks").fill("Ask the market for a table\nPick up the tabling kit\nRun the table")
     shot("lead-view-new-project", full=False)
     tid("edit-save").click()
-    expect(tid("project-project-1")).to_contain_text("0 of 3 done")
+    expect(tid("card-project-1")).to_contain_text("3 open tasks")
     shot("lead-view-detroit-project")
+    open_card("project-1")
+    expect(tid("board")).to_contain_text("0 of 3 done")
     tid("view-volunteer").click()
-    expect(tid("members")).to_contain_text("Nadia Haddad")
-    new_task = tid("project-project-1").get_by_test_id("team-task-task-1")
+    expect(tid("project-project-1")).to_contain_text("Tabling at the Royal Oak farmers market")
+    new_task = tid("team-task-task-1")
     new_task.get_by_test_id("claim").click()
     expect(new_task.get_by_test_id("claim-done")).to_be_visible()
+    shot("project-after-lead-view")
+    tid("back").click()
+    expect(tid("members")).to_contain_text("Nadia Haddad")
+    expect(tid("card-project-1")).to_contain_text("1 member")
     shot("group-after-lead-view")
 
     # Restart reloads: back to the email, and the lead view's edits are gone.

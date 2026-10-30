@@ -38,15 +38,14 @@ export const RADIUS_MI = 100
 // The onboarding's hours choice (Spec 5); your profile shows it.
 export const hoursOptions = ['Under 1 hour', '1–2 hours', '2–5 hours', '5–10 hours', 'Over 10 hours']
 
-export const LUMA = 'https://luma.com/pfp' // PFP's events calendar, linked on peopleforapause.org
-
 // kind 'start': Getting started, joined in one click, no application. kind 'stream': a nationwide pipeline that needs
 // an application.
 // A stream's tasks are an individual pipeline: the same steps for everyone, each volunteer marks their own progress.
 // A task's `action` is one of {href} (real page), {mock} (not part of the prototype), {copy} (text to copy), {route}.
 // A resource without `href` is mock.
 // `expectations`: the lead's text on the apply page (Spec 7.1), editable in the lead view: paragraphs split by an empty
-// line, links written [label](https://…).
+// line, links written [label](https://…). `workshops` (Town halls): the next ones, under the expectations on the apply
+// page. A meeting or workshop is {date, place, luma}: `luma` is a made-up lu.ma link, which only opens a toast.
 // For the lead view (Spec 21): `members` (everyone in the stream: `steps` = how many of its steps, from the first,
 // they did; see below the list), `applications` and `claudeAccepts` (as in groups, see there).
 export const streams = [
@@ -135,7 +134,11 @@ export const streams = [
       'From November to January, members of Congress and the newly elected hold events back home before the new Congress starts. We want our question asked at as many of them as we can.',
     ],
     expectations:
-      `Attend one of our town hall workshops first (online, 90 minutes): how to find a town hall, what to ask, and how to handle the answer. The next ones are on Sat Nov 7, 1 pm ET and Tue Nov 10, 7 pm ET, on [our Luma calendar](${LUMA}). In your application, tell me which workshop you attended or will attend.`,
+      'Attend one of our town hall workshops first (online, 90 minutes): how to find a town hall, what to ask, and how to handle the answer. In your application, tell me which workshop you attended or will attend.',
+    workshops: [
+      { date: 'Sat Nov 7, 1 pm ET', place: 'Online', luma: 'lu.ma/pfp-townhall-workshop-nov7' },
+      { date: 'Tue Nov 10, 7 pm ET', place: 'Online', luma: 'lu.ma/pfp-townhall-workshop-nov10' },
+    ],
     applyPlaceholder: 'e.g. I’m signed up for the workshop on Nov 7, and a friend wants to come along to town halls.',
     claudeAccepts: false,
     commitmentText: 'I can commit to this: about 4 hours a month until January.',
@@ -347,8 +350,10 @@ export const streams = [
 for (const stream of streams)
   for (const member of stream.members || []) member.done = stream.tasks.slice(0, member.steps).map((task) => task.id)
 
-// A local group's project is a team project: people claim different tasks. Members are in it by default.
-// A team task's `owner` is the member who claimed it (or null); the volunteer's own claims live in state.js.
+// A local group's project is a team project: the group's members claim different tasks; whoever claimed one of its
+// tasks counts as one of the project's members. A project has its own page (round 4): `tagline` is its one line on the
+// group page's card, `description` the text on its page. A team task's `owner` is the member who claimed it (or null);
+// the volunteer's own claims live in state.js. `nextMeeting`: {date, place, luma}, as a stream's `workshops`.
 // `applications` (streams have them too): mock applications for the lead view (Spec 21), each with the applicant's
 // profile (`place`, `about`, `hours` a week: Spec 5.1) and Claude's pre-screen (Spec 14): `screen` 'accept' | 'review'
 // | 'spam' and its `reasons`. `status` 'pending' | 'accepted' | 'rejected' changes in place when the lead decides;
@@ -366,7 +371,7 @@ export const groups = [
     lead: 'Maya Johnson',
     members: ['Maya Johnson', 'Chris Patel', 'Priya Raman', 'Dave Kowalski', 'Angela Brooks', 'Tom Nguyen', 'Rachel Stein', 'Marcus Hill', 'Linda Ortiz'],
     meets: 'Every other Thursday, 7 pm',
-    nextMeeting: 'Thu Nov 12, 7 pm, at the Royal Oak Public Library',
+    nextMeeting: { date: 'Thu Nov 12, 7 pm', place: 'Royal Oak Public Library', luma: 'lu.ma/pfp-detroit-nov12' },
     discord: '#detroit-area',
     description: [
       'We’re neighbors from Detroit, Dearborn, Royal Oak and Troy who want our representatives to back an international treaty that bans superintelligence.',
@@ -380,6 +385,7 @@ export const groups = [
       {
         id: 'evening',
         title: 'Community evening: “Should we pause AI?”',
+        tagline: 'A talk, questions and pizza at the library, Thu Dec 3.',
         description:
           'A free public evening at the Royal Oak Public Library on Thu Dec 3, 7 pm: a 20-minute talk, questions and pizza. Our goal: 40 guests and 10 new sign-ups.',
         tasks: [
@@ -391,6 +397,19 @@ export const groups = [
           { id: 'press', title: 'Invite local press', note: 'Email the Daily Tribune and WDET with our press note.', owner: null, done: false },
           { id: 'door', title: 'Run the sign-up table at the door', note: 'Greet guests, collect emails and hand out postcards.', owner: null, done: false },
           { id: 'pizza', title: 'Order pizza and drinks', note: 'For 40. Keep the receipt: national pays up to $150.', owner: 'Dave Kowalski', done: false },
+        ],
+      },
+      {
+        id: 'offices',
+        title: 'Meetings with our representatives',
+        tagline: 'Ask our three House offices for a meeting in December.',
+        description:
+          'The new Congress starts in January. Before that, three or four of us meet the staff of each of our House members in their district office: with letters from constituents and one clear ask, an international treaty that bans superintelligence.',
+        tasks: [
+          { id: 'request', title: 'Request the meetings', note: 'Call the three district offices, then email our one-page request.', owner: 'Rachel Stein', done: true },
+          { id: 'ask', title: 'Prepare our ask', note: 'Five minutes per meeting: who we are, the treaty, one clear ask.', owner: 'Tom Nguyen', done: false },
+          { id: 'letters', title: 'Collect constituent letters', note: 'Short, personal letters from members in each district.', owner: null, done: false },
+          { id: 'practice', title: 'Run a practice meeting', note: 'Thirty minutes on Zoom: who says what.', owner: null, done: false },
         ],
       },
     ],

@@ -50,9 +50,17 @@ const ICONS = {
   sparkles: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
 }
 
+// Brand marks, filled: Discord's logo (Simple Icons, CC0), on the Discord button (Spec 22, round 4).
+const MARKS = {
+  discord: '<path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>',
+}
+
 export function icon(name) {
+  const paint = MARKS[name]
+    ? 'fill="currentColor"'
+    : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
   return raw(
-    `<svg class="icon" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`,
+    `<svg class="icon" viewBox="0 0 24 24" width="1em" height="1em" ${paint} aria-hidden="true">${MARKS[name] || ICONS[name]}</svg>`,
   )
 }
 
@@ -76,6 +84,16 @@ export const richParagraphs = (text) =>
   String(text)
     .split(/\n\s*\n/)
     .map((paragraph) => html`<p>${richText(paragraph)}</p>`)
+
+// A group's next meeting or a stream's next workshops (round 4): date, place and the event's Luma link. The links are
+// made up: styled as the real hub's, they open the "not part of the prototype" toast.
+export function eventsCell(label, events, testid) {
+  return html`<div class="info-cell" data-testid="${testid}">${icon('calendar')}<div>
+    <p><strong>${label}</strong></p>
+    <ul class="events">${events.map((event) => html`<li><span>${event.date} · ${event.place}</span>
+      <button class="luma-link" type="button" data-action="mock" data-msg="This would open ${event.luma}." data-testid="luma-link">${event.luma} ${icon('external')}</button></li>`)}</ul>
+  </div></div>`
+}
 
 export const crumb = (to, label) => html`<a class="crumb" href="${to}" data-testid="back">${icon('left')} ${label}</a>`
 

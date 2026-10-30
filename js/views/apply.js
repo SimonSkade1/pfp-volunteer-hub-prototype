@@ -1,12 +1,13 @@
 // The apply page (Spec 7, 17), shared by streams, groups and vacancies. A stream or group: the lead's expectations
-// text (as the lead view last saved it) and a text field; streams also ask you to state that you can commit (Spec 7.2).
+// text (as the lead view last saved it), the next workshops where it has them (Town halls; round 4), and a text field;
+// streams also ask you to state that you can commit (Spec 7.2).
 // Where the lead lets Claude accept clear cases (Spec 14, 21), a Demo-tagged line says you're in on submit. A vacancy
 // (Spec 17.4): one field, why you'd be a good fit.
 
 import { findItem, firstName } from '../data.js'
 import { href } from '../router.js'
 import { membership } from '../state.js'
-import { crumb, html, richParagraphs } from '../ui.js'
+import { crumb, eventsCell, html, richParagraphs } from '../ui.js'
 import { hubPage } from './layout.js'
 import { notFound } from './stream.js'
 
@@ -37,6 +38,7 @@ export function applyView(id) {
             ${richParagraphs(item.expectations)}
             <footer>${item.lead}, ${item.kind === 'group' ? 'group lead' : 'stream lead'}</footer>
           </blockquote>
+          ${item.workshops ? eventsCell('Next workshops', item.workshops, 'workshops') : ''}
         </section>`}
     <form class="form card" data-form="apply" data-id="${item.id}" data-testid="apply-form">
       <label class="field">

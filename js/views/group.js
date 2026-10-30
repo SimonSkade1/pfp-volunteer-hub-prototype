@@ -1,12 +1,15 @@
-// A local group's page (Spec 20): description and the projects it runs. A project is a team project (Spec 19):
-// members are in it by default and claim different tasks. Before you're accepted: Apply in the page head, and what the
-// group works on. The page has the demo's switch to the group's lead view (views/manage.js), which shows the same task
-// boards.
+// A local group's page (Spec 20): description and the projects it runs. Before you're accepted: Apply in the page head,
+// and what the group works on. Once you're in: the next meeting with its Luma link and the Discord channel, then Team
+// projects: a card per project, which opens the project's page (round 4), then the members.
+// A project's page: its description and its task board. A project is a team project (Spec 19): the group's members
+// claim different tasks. Both pages have the demo's switch to the lead view (views/manage.js), whose project page shows
+// the same board as the lead sees it.
 
 import { findGroup, firstName, volunteer } from '../data.js'
 import { href } from '../router.js'
-import { acceptedApplicants, memberCount, membership, projectCounts, teamTask, teamTaskKey } from '../state.js'
-import { html, icon, initialsOf, paragraphs, pluralize } from '../ui.js'
+import { acceptedApplicants, memberCount, membership, projectCounts, state, teamTask, teamTaskKey } from '../state.js'
+import { eventsCell, html, icon, initialsOf, paragraphs, pluralize } from '../ui.js'
+import { cardTitle } from './home.js'
 import { hubPage, pageTop, viewSwitch } from './layout.js'
 import { discordButton, headRow, headStatus, leadLink, notFound } from './stream.js'
 
@@ -17,7 +20,7 @@ export function groupView(id) {
 
   const body =
     status === 'member'
-      ? html`${meetingLine(group)}${group.projects.map((project) => projectBoard(group, project))}${memberList(group)}`
+      ? html`${meetingLine(group)}${projectCards(group, (project) => href.project(group.id, project.id))}${memberList(group)}`
       : projectPreview(group)
 
   return hubPage(html`
@@ -39,25 +42,61 @@ export function groupView(id) {
   `)
 }
 
+// The next meeting, and once you've connected Discord, the channel (before that, its call to action is in the head).
 function meetingLine(group) {
   return html`<div class="info-row">
-    <div class="info-cell">${icon('calendar')}<p><strong>Next meeting</strong><br>${group.nextMeeting}</p></div>
-    <div class="info-cell" data-testid="discord-line">${icon('chat')}<div><p><strong>${group.discord}</strong> on our Discord</p>${discordButton(group)}</div></div>
+    ${eventsCell('Next meeting', [group.nextMeeting], 'next-meeting')}
+    ${state.discord
+      ? html`<div class="info-cell" data-testid="discord-line">${icon('chat')}<div><p><strong>${group.discord}</strong> on our Discord</p>${discordButton(group)}</div></div>`
+      : ''}
   </div>`
 }
 
-// The team board: who claimed what, what is open. You can claim open tasks and finish your own. The lead view shows
-// it read-only (asLead): every owner by name, you included, and "Open" for unclaimed tasks.
+// A card per project: its name, its one line, open tasks and members (who claimed a task). `to` gives its page: the
+// project's page here, the lead's in the lead view.
+export function projectCards(group, to) {
+  return html`<section class="block" data-testid="team-projects">
+    <h2 class="block-title">Team projects</h2>
+    <div class="grid">
+      ${group.projects.map((project) => {
+        const counts = projectCounts(group, project)
+        return html`<article class="card" data-testid="card-${project.id}">
+          ${cardTitle(project, to(project))}
+          ${project.tagline ? html`<p class="card-text">${project.tagline}</p>` : ''}
+          <p class="card-meta"><span class="card-open">${pluralize(counts.open, 'open task')}</span><span>${pluralize(counts.people, 'member')}</span></p>
+        </article>`
+      })}
+    </div>
+  </section>`
+}
+
+export function projectView(groupId, projectId) {
+  const group = findGroup(groupId)
+  const project = group?.projects.find((p) => p.id === projectId)
+  if (!project) return notFound()
+  return hubPage(html`
+    ${pageTop(href.group(group.id), group.title, viewSwitch(group, 'volunteer', project))}
+    <div class="page-head" data-testid="project-${project.id}">
+      <p class="eyebrow">Team project</p>
+      <h1>${project.title}</h1>
+    </div>
+    ${project.description ? paragraphs([project.description]) : ''}
+    ${membership(group.id) === 'member'
+      ? projectBoard(group, project)
+      : html`<p class="block muted">Join <a class="link" href="${href.group(group.id)}">${group.title}</a> to claim a task.</p>`}
+  `)
+}
+
+// The team board: who claimed what, what is open. You can claim open tasks and finish your own. The lead's project page
+// shows it read-only (asLead): every owner by name, you included, and "Open" for unclaimed tasks.
 export function projectBoard(group, project, asLead = false) {
   const counts = projectCounts(group, project)
   const claimed = counts.total - counts.done - counts.open
-  return html`<section class="block" data-testid="project-${project.id}">
-    <p class="eyebrow">Team project</p>
-    ${asLead ? html`<h3 class="block-title">${project.title}</h3>` : html`<h2 class="block-title">${project.title}</h2>`}
-    ${project.description ? html`<p class="prose-sm">${project.description}</p>` : ''}
+  return html`<section class="block" data-testid="board">
+    <h2 class="block-title">Tasks</h2>
     <p class="board-summary">${asLead
       ? html`${counts.done} of ${counts.total} done · ${claimed} claimed · <strong>${counts.open} open</strong>`
-      : html`${counts.done} of ${counts.total} done · <strong>${pluralize(counts.open, 'open task')}</strong>: claim one`}</p>
+      : html`${counts.done} of ${counts.total} done · <strong>${pluralize(counts.open, 'open task')}</strong>${counts.open ? ': claim one' : ''}`}</p>
     <ul class="board">
       ${project.tasks.map((task) => {
         const view = teamTask(group, project, task)
@@ -106,7 +145,7 @@ function memberList(group) {
   </section>`
 }
 
-// Before you're in: what the group currently works on, without the task board.
+// Before you're in: what the group currently works on, without the projects' pages.
 function projectPreview(group) {
   return html`<section class="block" data-testid="preview">
     <h2 class="block-title">What we’re working on</h2>

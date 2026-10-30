@@ -3,14 +3,15 @@
 // the applications, the same for both kinds: each with the applicant's profile (Spec 5.1) and Claude's pre-screen
 // (Spec 14) with its reasons, accept / reject; Claude's accepts are marked, and the lead can undo them.
 // Then, for a stream: where its members are in its steps, and an editor for its description, steps and resources;
-// for a group: its projects' task boards and a form to create a project. Editing is mock: it changes the content in
-// data.js in place, so the volunteer side shows it at once, until the page is reloaded. No explanatory text (Spec 23.2).
+// for a group: its projects' cards and a form to create a project. A card opens the project's lead page, its task
+// board as the lead sees it (round 4). Editing is mock: it changes the content in data.js in place, so the volunteer
+// side shows it at once, until the page is reloaded. No explanatory text (Spec 23.2).
 
 import { findGroup, findItem, findStream, volunteer } from '../data.js'
 import { href } from '../router.js'
 import { applicationsFor, memberCount, membersByStep, rerender, setApplicationStatus, setClaudeAccepts } from '../state.js'
 import { html, icon, paragraphs, richParagraphs, toast } from '../ui.js'
-import { projectBoard } from './group.js'
+import { projectBoard, projectCards } from './group.js'
 import { hubPage, pageTop, viewSwitch } from './layout.js'
 import { notFound } from './stream.js'
 
@@ -23,9 +24,10 @@ window.addEventListener('hashchange', () => {
   editing = null // registered before app.js's render on hashchange, so it runs first
 })
 
-export function manageView(id) {
+export function manageView(id, projectId) {
   const item = findItem(id)
   if (item?.kind !== 'stream' && item?.kind !== 'group') return notFound() // Getting started and vacancies have none
+  if (projectId) return projectLeadView(item, projectId)
   const isStream = item.kind === 'stream'
 
   return hubPage(html`
@@ -281,14 +283,11 @@ function resourceForm(stream, resource, index) {
   </form>`
 }
 
-// ---- A group: its projects' task boards, and a new project ----
+// ---- A group: its projects, a new project, and a project's lead page ----
 
 function projectsPanel(group) {
-  return html`<section class="block" data-testid="projects">
-    <h2 class="block-title">Projects</h2>
-    ${group.projects.map((project) => projectBoard(group, project, true))}
-    <div class="add-project">${isEditing(group, 'project:new') ? projectForm(group) : addButton(group, 'project:new', 'Create a project', 'create-project')}</div>
-  </section>`
+  return html`${projectCards(group, (project) => href.manage(group.id, project.id))}
+    <div class="add-project">${isEditing(group, 'project:new') ? projectForm(group) : addButton(group, 'project:new', 'Create a project', 'create-project')}</div>`
 }
 
 function projectForm(group) {
@@ -296,12 +295,28 @@ function projectForm(group) {
     <h3 class="edit-form-title">New project</h3>
     <label class="field"><span class="label">Name</span>
       <input name="title" required data-autofocus placeholder="e.g. Tabling at the Royal Oak farmers market" data-testid="project-name"></label>
+    <label class="field"><span class="label">Summary</span>
+      <input name="tagline" required placeholder="e.g. Our table at the market, Sat Nov 21." data-testid="project-summary"></label>
     <label class="field"><span class="label">Description <span class="optional">Optional</span></span>
       <textarea name="description" rows="3" placeholder="What, when and where, and your goal." data-testid="project-description"></textarea></label>
     <label class="field"><span class="label">Tasks</span>
       <textarea name="tasks" rows="5" required placeholder="Ask the market for a table&#10;Pick up the tabling kit&#10;Run the table, Sat 9–11 am" data-testid="project-tasks"></textarea></label>
     ${formButtons('Create project')}
   </form>`
+}
+
+// The lead's page of a project: its task board, who claimed what and what is open (no assigning).
+function projectLeadView(group, projectId) {
+  const project = group.kind === 'group' && group.projects.find((p) => p.id === projectId)
+  if (!project) return notFound()
+  return hubPage(html`
+    ${pageTop(href.manage(group.id), group.title, viewSwitch(group, 'lead', project))}
+    <div class="page-head" data-testid="manage-${project.id}">
+      <p class="eyebrow">Lead view · Team project</p>
+      <h1>${project.title}</h1>
+    </div>
+    ${projectBoard(group, project, true)}
+  `)
 }
 
 // ---- Shared pieces ----
@@ -436,9 +451,10 @@ export const manageForms = {
     group.projects.push({
       id: freshId(group.projects, 'project'),
       title: data.get('title').trim(),
+      tagline: data.get('tagline').trim(),
       description: data.get('description').trim(),
       tasks: lines(data.get('tasks')).map((title, i) => ({ id: `task-${i + 1}`, title, note: '', owner: null, done: false })),
     })
-    changed('Project created. Members see it on the group page and can claim its tasks.')
+    changed('Project created. Members see it on the group page and can claim its tasks on its page.')
   },
 }

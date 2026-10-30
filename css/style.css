@@ -3,9 +3,11 @@
    - the sticky top bar carries both, in its ribbon;
    - a page head pairs its navy title with a red eyebrow chip, and with the red call to action beside it;
    - red marks what you can do (primary buttons, the main page's two quiet links, a card's arrow, the next step, the
-     setting we recommend), blue where you are and what things are (titles, badges, tags, progress and done marks,
-     icons, other links, secondary buttons);
-   - avatars, section titles and body text are ink. */
+     setting we recommend, open tasks), blue where you are and what things are (titles, badges, tags, progress and done
+     marks, icons, other links, secondary buttons);
+   - avatars, section titles and body text are ink;
+   - one exception: the Discord button keeps Discord's own blurple and logo (round 4), which color_balance.py doesn't
+     count. */
 
 @font-face {
   font-family: 'Schibsted Grotesk';
@@ -501,6 +503,12 @@ select {
   content: '· ';
 }
 
+/* A project card's open tasks: what you can do. */
+.card-meta .card-open {
+  color: var(--red);
+  font-weight: 700;
+}
+
 
 /* ---- Progress ---- */
 
@@ -855,6 +863,49 @@ select {
 
 /* Discord, meetings */
 
+/* Discord's own button: its brand color, its logo, white text, its rounded corners. */
+.btn-discord {
+  border-color: #5865f2;
+  border-radius: 4px;
+  background: #5865f2;
+  color: #fff;
+}
+
+.btn-discord:hover {
+  border-color: #4752c4;
+  background: #4752c4;
+}
+
+.btn-discord .icon {
+  font-size: 22px;
+}
+
+/* Once you're in, until you connect: Discord's call to action, the first thing on the page. */
+.discord-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding: 18px 20px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.page-head .discord-cta {
+  margin-top: 22px;
+}
+
+.discord-cta-text {
+  flex: 1 1 300px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.discord-cta-text strong {
+  font-weight: 800;
+}
+
 .discord-line {
   display: flex;
   align-items: center;
@@ -881,7 +932,7 @@ select {
 
 .info-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 12px;
   margin-top: 28px;
 }
@@ -899,6 +950,46 @@ select {
 .info-cell > .icon {
   margin-top: 2px;
   font-size: 22px;
+}
+
+/* A meeting's or workshop's date and place, and its Luma link (made up: it opens a toast). */
+.events {
+  padding: 0;
+  list-style: none;
+}
+
+.events li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+}
+
+.events li + li {
+  margin-top: 4px;
+}
+
+.luma-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.luma-link:hover {
+  color: var(--blue-deep);
+}
+
+/* The apply page's next workshops, under the lead's expectations */
+.expectations + .info-cell {
+  margin: 18px 0 24px;
 }
 
 /* Expectations (the apply page), pending */
@@ -1076,7 +1167,7 @@ select {
 /* Team project board */
 
 .board-summary {
-  margin: 14px 0 10px;
+  margin-bottom: 10px;
   font-size: 15px;
 }
 
@@ -1904,10 +1995,12 @@ textarea::placeholder {
   margin-top: 28px;
 }
 
+/* An unclaimed task on the lead's board: what still needs someone. */
 .open-tag {
   padding: 1px 8px;
-  border: 2px dashed var(--red);
-  color: var(--red);
+  border: 2px solid var(--red);
+  background: var(--red);
+  color: #fff;
   font-size: 13px;
   font-weight: 700;
 }
@@ -2108,6 +2201,14 @@ textarea::placeholder {
 
   .info-row {
     grid-template-columns: 1fr;
+  }
+
+  .discord-cta {
+    padding: 16px;
+  }
+
+  .discord-cta .btn {
+    width: 100%;
   }
 
   .board-task {

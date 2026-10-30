@@ -104,12 +104,14 @@ export function teamTask(group, project, task) {
   return { owner: task.owner, done: task.done, mine: false }
 }
 
+// A project's tasks done, open (unclaimed) and in all, and its members: the people who claimed one of its tasks.
 export function projectCounts(group, project) {
   const views = project.tasks.map((task) => teamTask(group, project, task))
   return {
     done: views.filter((t) => t.done).length,
     open: views.filter((t) => !t.owner).length,
     total: views.length,
+    people: new Set(views.filter((t) => t.owner).map((t) => t.owner)).size,
   }
 }
 

@@ -52,8 +52,8 @@ export function homeView() {
 }
 
 // The title is the card's link (stretched over the card); the arrow only shows that the card opens a page.
-export const cardTitle = (item) =>
-  html`<h3 class="card-title"><a class="stretched" href="${href.item(item)}">${item.title}</a>${icon('right')}</h3>`
+export const cardTitle = (item, to = href.item(item)) =>
+  html`<h3 class="card-title"><a class="stretched" href="${to}">${item.title}</a>${icon('right')}</h3>`
 
 const KINDS = { group: 'Local group', stream: 'Stream', start: 'Roadmap' }
 
@@ -63,10 +63,9 @@ function yourCard(item) {
   let line
   if (status === 'pending') line = html`<p class="card-text muted">Application sent. ${firstName(item.lead)} gets back to you soon.</p>`
   else if (item.kind === 'group') {
-    const [project] = item.projects
-    const counts = projectCounts(item, project)
-    line = html`<p class="card-text">${icon('calendar')} Next meeting: ${item.nextMeeting}</p>
-      <p class="card-text muted">${project.title}: ${pluralize(counts.open, 'open task')}</p>`
+    const open = item.projects.reduce((sum, project) => sum + projectCounts(item, project).open, 0)
+    line = html`<p class="card-text">${icon('calendar')} Next meeting: ${item.nextMeeting.date} · ${item.nextMeeting.place}</p>
+      <p class="card-text muted">${pluralize(open, 'open task')} in ${pluralize(item.projects.length, 'project')}</p>`
   } else {
     const p = progress(item)
     line = p.next

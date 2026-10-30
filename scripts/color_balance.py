@@ -7,7 +7,9 @@ Usage: scripts/color_balance.py [shots_dir] [max_ratio]
 
 Each screenshot is cut into screenfuls (1440x900 or 390x844, every half screen down the page). A screenful further
 down also holds the sticky top bar with its ribbon, so its pixels count there too. Counted: strongly red and strongly
-blue pixels (the hub's two colors, their hover shades and anti-aliased edges; pale tints don't count). A screenful
+blue pixels (the hub's two colors, their hover shades and anti-aliased edges; pale tints don't count). Not counted:
+Discord's blurple (#5865F2, hue 235 degrees; the hub's blue is 222), the brand color of the Discord button, which the
+hub keeps as it is (round 4). A screenful
 with little color of either (under 0.05% of its pixels) passes: the top bar's ribbon is in it anyway. Prints the worst
 screenful of every screenshot; exit 1 if any fails. Needs numpy and Pillow.
 """
@@ -31,7 +33,8 @@ def masks(img):
     strong = (sat >= 0.45) & (mx >= 0.3)
     red = strong & (r == mx) & (g < 0.5 * r) & (b < 0.6 * r)
     blue = strong & (b == mx) & (r < 0.5 * b) & (g < 0.8 * b) & (g > 0.15 * b)
-    return red, blue
+    blurple = (g - r) < 0.18 * (b - r)  # hue over 229 degrees: Discord's blurple, its hover shade and their edges
+    return red, blue & ~blurple
 
 
 def top_bar(img, red, blue):
