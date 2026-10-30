@@ -1,5 +1,7 @@
 # PFP volunteer hub — prototype
 
+"Spec N" in this README, the code comments and the scripts refers to the project's archived spec (vault note `;archived spec of rounds 1 to 3 for the onboarding prototype`, Spec 1–25), not to the project's current Spec, rewritten on 2026-10-29.
+
 A click-through prototype of the People for a Pause volunteer hub, for Ben and Felix to decide on the onboarding flow:
 the welcome email after the website signup → the one onboarding step (about you, hours a week) → the hub's main page
 (your groups and streams; join a local group; join a stream, Getting started last; "Want to do more?" → vacancies) → a
