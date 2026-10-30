@@ -7,7 +7,7 @@ import { accept, apply, completeOnboarding, connectDiscord, join, progress, setC
 import { dropOldToast, toast } from './ui.js'
 import { applyView } from './views/apply.js'
 import { emailView } from './views/email.js'
-import { groupView, projectView } from './views/group.js'
+import { groupView, groupsView, projectView } from './views/group.js'
 import { homeView } from './views/home.js'
 import { manageActions, manageForms, manageView } from './views/manage.js'
 import { onboardingView } from './views/onboarding.js'
@@ -30,6 +30,8 @@ function view(route) {
       return streamView(route.id)
     case 'task':
       return taskView(route.streamId, route.taskId)
+    case 'groups':
+      return groupsView()
     case 'group':
       return groupView(route.id)
     case 'project':

@@ -4,14 +4,24 @@
 // A project's page: its description and its task board. A project is a team project (Spec 19): the group's members
 // claim different tasks. Both pages have the demo's switch to the lead view (views/manage.js), whose project page shows
 // the same board as the lead sees it.
+// The page of all local groups (round 5), from the main page's "Browse all local groups": every group, nearest first,
+// each card with its distance, as on the main page; yours with its badge.
 
-import { findGroup, firstName, volunteer } from '../data.js'
+import { findGroup, firstName, groups, volunteer } from '../data.js'
 import { href } from '../router.js'
 import { acceptedApplicants, memberCount, membership, projectCounts, state, teamTask, teamTaskKey } from '../state.js'
-import { eventsCell, html, icon, initialsOf, paragraphs, pluralize } from '../ui.js'
-import { cardTitle } from './home.js'
+import { crumb, eventsCell, html, icon, initialsOf, paragraphs, pluralize } from '../ui.js'
+import { cardTitle, groupCard, milesFromYou } from './home.js'
 import { hubPage, pageTop, viewSwitch } from './layout.js'
 import { discordButton, headRow, headStatus, leadLink, notFound } from './stream.js'
+
+export function groupsView() {
+  return hubPage(html`
+    ${crumb(href.home, 'Your hub')}
+    <div class="page-head" data-testid="all-groups"><p class="eyebrow">Join a local group</p><h1>All local groups</h1></div>
+    <div class="grid">${[...groups].sort((a, b) => a.distance - b.distance).map(groupCard)}</div>
+  `)
+}
 
 export function groupView(id) {
   const group = findGroup(id)
@@ -33,7 +43,7 @@ export function groupView(id) {
         <li>${icon('user')} Led by ${leadLink(group)}</li>
         <li>${icon('users')} ${pluralize(memberCount(group), 'member')}</li>
         <li>${icon('calendar')} ${group.meets}</li>
-        <li>${icon('pin')} ${group.place} · ${group.distance} mi from you</li>
+        <li>${icon('pin')} ${group.place} · ${milesFromYou(group)}</li>
       </ul>
       ${headStatus(group, status)}
     </div>

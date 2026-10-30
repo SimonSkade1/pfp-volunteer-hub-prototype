@@ -2,9 +2,9 @@
    Red and blue in balance within every screenful (Spec 23.1; check: scripts/color_balance.py):
    - the sticky top bar carries both, in its ribbon;
    - a page head pairs its navy title with a red eyebrow chip, and with the red call to action beside it;
-   - red marks what you can do (primary buttons, the main page's two quiet links, a card's arrow, the next step, the
-     setting we recommend, open tasks), blue where you are and what things are (titles, badges, tags, progress and done
-     marks, icons, other links, secondary buttons);
+   - red marks what you can do (primary buttons, the main page's quiet links and, in Join a local group, its link to
+     all local groups, a card's arrow, the next step, the setting we recommend, open tasks), blue where you are and
+     what things are (titles, badges, tags, progress and done marks, icons, other links, secondary buttons);
    - avatars, section titles and body text are ink;
    - one exception: the Discord button keeps Discord's own blurple and logo (round 4), which color_balance.py doesn't
      count. */
@@ -376,14 +376,14 @@ select {
   margin-top: 16px;
 }
 
-/* A quiet line (Spec 25): muted body text whose second sentence is a plain red link; under the local groups (the
-   start-a-group vacancy) and ending the main page (the vacancies). */
+/* The quiet line ending the main page (Spec 25, round 5): muted body text with two plain red links, the start-a-group
+   vacancy and the vacancies. */
 .quiet-line {
   color: var(--muted);
 }
 
 .quiet-line a {
-  display: inline-block; /* on a phone, the link moves to the next line whole instead of breaking */
+  display: inline-block; /* on a phone, a link moves to the next line whole instead of breaking */
   color: var(--red);
 }
 
@@ -391,8 +391,28 @@ select {
   color: var(--red-deep);
 }
 
-.section > .quiet-line {
+/* The small link below a section's cards to the page of all local groups (round 5): red in Join a local group, as a
+   way in; blue below your own cards, where it only navigates, like the hub's other links (and the red of their labels
+   and arrows needs blue on a phone). */
+.small-link {
   margin-top: 16px;
+  font-size: 15px;
+}
+
+.small-link a {
+  color: var(--blue);
+}
+
+.small-link a:hover {
+  color: var(--blue-deep);
+}
+
+.small-link-join a {
+  color: var(--red);
+}
+
+.small-link-join a:hover {
+  color: var(--red-deep);
 }
 
 .grid {

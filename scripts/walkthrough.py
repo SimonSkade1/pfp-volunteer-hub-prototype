@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Click through the demo path (Spec 17), volunteer side and lead view, and screenshot every screen at desktop and
-phone width. Round 4 added Discord's call to action, the Luma links and the projects' pages.
+phone width. Round 4 added Discord's call to action, the Luma links and the projects' pages; round 5 the main page's
+last line and the page of all local groups.
 
 Usage: scripts/walkthrough.py [url] [out_dir]
   url      default: the GitHub Pages site
@@ -95,6 +96,11 @@ def run(browser, name, options):
     # Main page (Spec 6): nothing joined yet; Getting started is the last stream, without an application.
     expect(tid("your-empty")).to_be_visible()
     expect(tid("join-group").get_by_test_id("card-detroit")).to_contain_text("40 mi from you")
+    expect(tid("join-group").locator(".card")).to_have_count(1)  # the groups further away: only on the all-groups page
+    expect(tid("join-group").get_by_test_id("browse-groups")).to_be_visible()
+    # Round 5: one last line, in every state, for leading a group and the vacancies.
+    expect(tid("start-group")).to_have_count(1)
+    expect(tid("do-more")).to_have_text("Want to do more? Apply to lead a local group or check out our volunteer vacancies.")
     expect(tid("join-stream").locator(".card").last).to_have_attribute("data-testid", "card-getting-started")
     expect(tid("card-getting-started")).to_contain_text("No application required")
     expect(page.locator("[data-testid^=card-] .btn")).to_have_count(0)  # cards have no buttons: a card opens its page
@@ -106,10 +112,25 @@ def run(browser, name, options):
     shot("profile")
     home()
 
-    # The start-a-group link opens that vacancy.
-    tid("start-group").click()
+    # The last line's start-a-group link opens that vacancy.
+    tid("do-more").get_by_test_id("start-group").click()
     expect(tid("vacancy-warning")).to_contain_text("huge amount of work")
     shot("start-a-group")
+    home()
+
+    # Round 5: all local groups, nearest first, each with its distance; a group further away has its page too.
+    tid("browse-groups").click()
+    expect(tid("all-groups").locator("h1")).to_have_text("All local groups")
+    order = page.locator("[data-testid^=card-]").evaluate_all("cards => cards.map((card) => card.dataset.testid)")
+    assert order == ["card-detroit", "card-chicago", "card-nashville", "card-austin"], order
+    expect(tid("card-austin")).to_contain_text("1,140 mi from you")
+    expect(page.locator(".badge")).to_have_count(0)  # in no group yet
+    shot("all-groups")
+    open_card("chicago")
+    expect(tid("group-chicago")).to_contain_text("Chicago, IL · 200 mi from you")
+    expect(tid("apply")).to_be_visible()
+    expect(tid("preview")).to_contain_text("Talks on three campuses")
+    shot("group-far-away")
     home()
 
     # A stream: Apply in the head; the lead's profile; the apply page with the workshop's Luma link; pending.
@@ -208,6 +229,7 @@ def run(browser, name, options):
     expect(tid("pending-box")).to_be_visible()
     home()
     expect(tid("join-group")).to_have_count(0)  # waiting on a group: Join a local group goes
+    expect(tid("your-items").get_by_test_id("browse-groups")).to_be_visible()  # its link stays, below your cards
     open_card("detroit")
     tid("view-lead").click()
     expect(tid("application-you")).to_contain_text("I live in Ann Arbor")
@@ -254,12 +276,20 @@ def run(browser, name, options):
     expect(tid("card-evening")).to_contain_text("3 open tasks")
     expect(tid("card-evening")).to_contain_text("5 members")  # you claimed one of its tasks
 
-    # The main page with everything joined: no group or stream left to join.
+    # The main page with everything joined: no group or stream left to join; the link to all local groups below your
+    # cards, and the last line as before.
     home()
     expect(tid("card-detroit")).to_contain_text("5 open tasks in 2 projects")
     expect(tid("join-group")).to_have_count(0)
     expect(tid("join-stream")).to_have_count(0)
+    expect(tid("your-items").get_by_test_id("browse-groups")).to_be_visible()
+    expect(tid("do-more").get_by_test_id("start-group")).to_be_visible()
     shot("hub-joined")
+    tid("browse-groups").click()
+    expect(tid("card-detroit")).to_contain_text("Joined")
+    expect(page.locator(".badge")).to_have_count(1)
+    shot("all-groups-joined")
+    home()
 
     # Vacancies (Spec 6.4, 17.4): the page, one vacancy, the shared apply page with one field, sent.
     tid("vacancies-link").click()

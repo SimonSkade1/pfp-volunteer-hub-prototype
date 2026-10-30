@@ -4,19 +4,20 @@
 
 A click-through prototype of the People for a Pause volunteer hub, for Ben and Felix to decide on the onboarding flow:
 the welcome email after the website signup → the one onboarding step (about you, hours a week) → the hub's main page
-(your groups and streams; join a local group; join a stream, Getting started last; "Want to do more?" → vacancies) → a
-stream's, group's or vacancy's page with Apply in its head → the apply page → pending → accepted (skip ahead) → first
-Discord's own "Connect Discord" button in the page head (mock), then the stream's steps or the group's Team projects (a
-card per project, which opens the project's page with its task board). A group's next meeting and Town halls' next
-workshops carry made-up Luma links (a toast). Profiles: yours from your initials in the top bar, a lead's from their
-name. A "View as: Volunteer | Lead" switch on stream, group and project pages opens the lead view: the
-lead's expectations (editable; the apply page shows them) and who accepts applications ("I review every application" /
-"Claude accepts clear cases, I review the rest": Op-eds is set to Claude, Town halls and Detroit area to their leads);
-applications with the applicant's profile and hours, Claude's pre-screen and accept / reject, Claude's accepts marked
-and undoable; for a stream, its members by step and an editor for its description, steps and resources; for a group, its
-projects' cards, each opening the project's lead page with its task board, and a form for a new project. Front end
-only: mock data, no backend, nothing is sent; all people, numbers and dates are made up (real links are marked with an
-external-link icon, and so are the made-up Luma links, which only open a toast).
+(your groups and streams; join a local group, and a link to all local groups; join a stream, Getting started last; "Want
+to do more?" → lead a local group, or the vacancies) → a stream's, group's or vacancy's page with Apply in its head →
+the apply page → pending → accepted (skip ahead) → first Discord's own "Connect Discord" button in the page head (mock),
+then the stream's steps or the group's Team projects (a card per project, which opens the project's page with its task
+board). A group's next meeting and Town halls' next workshops carry made-up Luma links (a toast). Profiles: yours from
+your initials in the top bar, a lead's from their name. A "View as: Volunteer | Lead" switch on stream, group and
+project pages opens the lead view: the lead's expectations (editable; the apply page shows them) and who accepts
+applications ("I review every application" / "Claude accepts clear cases, I review the rest": Op-eds is set to Claude,
+Town halls and Detroit area to their leads); applications with the applicant's profile and hours, Claude's pre-screen
+and accept / reject, Claude's accepts marked and undoable; for a stream, its members by step and an editor for its
+description, steps and resources; for a group, its projects' cards, each opening the project's lead page with its task
+board, and a form for a new project. Front end only: mock data, no backend, nothing is sent; all people, numbers and
+dates are made up (real links are marked with an external-link icon, and so are the made-up Luma links, which only open
+a toast).
 
 Live: https://simonskade1.github.io/pfp-volunteer-hub-prototype/
 
@@ -58,11 +59,11 @@ reload) sees the new version.
 
 | File | What it holds |
 |---|---|
-| `js/data.js` | **Data**: all mock content — the demo volunteer, the welcome email (same text as the vault note), `streams` (Getting started is `kind: 'start'`: joined in one click; Town halls and Op-eds are `kind: 'stream'`), `groups` with their team `projects` (each with `tagline`, its card's one line, and `description`), `vacancies` (`kind: 'vacancy'`), the leads' profiles (`leads`, matched by name to an item's `lead`), `RADIUS_MI` (groups listed on the main page), `hoursOptions` (the onboarding's choice). A text may hold a link written `[label](https://…)`; `richText` in `js/ui.js` renders it, `richParagraphs` a text of paragraphs split by an empty line (the expectations). A group's `nextMeeting` and Town halls' `workshops` are `{date, place, luma}`: `luma` is a made-up lu.ma link (`eventsCell` in `js/ui.js` renders them, the link opening a toast). For the lead view: every stream's and group's `members`, `claudeAccepts` (the lead's setting: `true` = Claude accepts clear cases) and mock `applications` with the applicant's profile (`place`, `about`, `hours`), Claude's pre-screen (`screen`: `accept` / `review` / `spam`, and `reasons`) and `status` (`by: 'claude'` where Claude accepted it). Views read these objects on every render; the lead view changes them in place; nothing in here is persisted. |
+| `js/data.js` | **Data**: all mock content — the demo volunteer, the welcome email (same text as the vault note), `streams` (Getting started is `kind: 'start'`: joined in one click; Town halls and Op-eds are `kind: 'stream'`), `groups` (Detroit area within `RADIUS_MI`; Chicago, Nashville and Austin further away, listed only on the page of all local groups) with their team `projects` (each with `tagline`, its card's one line, and `description`), `vacancies` (`kind: 'vacancy'`), the leads' profiles (`leads`, matched by name to an item's `lead`), `RADIUS_MI` (groups listed on the main page; `distance` is in miles from you), `hoursOptions` (the onboarding's choice). A text may hold a link written `[label](https://…)`; `richText` in `js/ui.js` renders it, `richParagraphs` a text of paragraphs split by an empty line (the expectations). A group's `nextMeeting` and Town halls' `workshops` are `{date, place, luma}`: `luma` is a made-up lu.ma link (`eventsCell` in `js/ui.js` renders them, the link opening a toast). For the lead view: every stream's and group's `members`, `claudeAccepts` (the lead's setting: `true` = Claude accepts clear cases) and mock `applications` with the applicant's profile (`place`, `about`, `hours`), Claude's pre-screen (`screen`: `accept` / `review` / `spam`, and `reasons`) and `status` (`by: 'claude'` where Claude accepted it). Views read these objects on every render; the lead view changes them in place; nothing in here is persisted. |
 | `js/state.js` | **State**: the volunteer's progress in `localStorage` (`profile` {about, hours}, `joined`, `applications` for streams, groups and vacancies, each {status, text, by}, `done`, `claims`, `discord`), selectors that combine it with the data (`membership`, `progress`, `memberCount`, `teamTask`, `projectCounts` with a project's members, i.e. who claimed one of its tasks, and for the lead view `applicationsFor`, `membersByStep`) and the actions that change it (`apply` accepts at once where `claudeAccepts`; `setClaudeAccepts` is the lead's setting). `update(fn)` saves and re-renders; `rerender()` only re-renders (after the lead view's in-place edits). |
-| `js/views/*.js` | **Views**: one function per screen, returning HTML (`email`, `onboarding`, `home` = main page and the shared card pieces, `stream` = stream and task pages plus the page head's title row with Apply / Join, the pending box and Discord's call to action, `group` = group page, project cards and project page, `apply` = the apply page of a stream, group or vacancy, `vacancies` = the vacancies page and a vacancy's page, `profile` = yours and a lead's, `manage` = the lead view of a stream or group and a project's lead page, with its own click and submit handlers and the open-editor state, `layout` = prototype bar, sticky top bar, page frame, back link row and the view switch). |
+| `js/views/*.js` | **Views**: one function per screen, returning HTML (`email`, `onboarding`, `home` = main page and the shared card pieces, a group's card too, `stream` = stream and task pages plus the page head's title row with Apply / Join, the pending box and Discord's call to action, `group` = the page of all local groups, group page, project cards and project page, `apply` = the apply page of a stream, group or vacancy, `vacancies` = the vacancies page and a vacancy's page, `profile` = yours and a lead's, `manage` = the lead view of a stream or group and a project's lead page, with its own click and submit handlers and the open-editor state, `layout` = prototype bar, sticky top bar, page frame, back link row and the view switch). |
 | `js/app.js` | Boot and wiring: hash route → view, re-render on route or state change, and two delegated handlers: clicks on `[data-action]` (the `actions` object, plus `manageActions`) and submits of `form[data-form]` (the `forms` object, plus `manageForms`). |
-| `js/router.js` | Hash routes (`#/email`, `#/welcome` = onboarding, `#/hub` = main page, `#/s/<stream>`, `#/s/<stream>/<task>`, `#/g/<group>`, `#/g/<group>/<project>` = a project's page, `#/vacancies`, `#/v/<vacancy>`, `#/apply/<stream, group or vacancy>`, `#/me` = your profile, `#/p/<lead id>` = a lead's, `#/manage/<stream or group>` = the lead view, `#/manage/<group>/<project>` = a project's lead page) and the `href` helpers. |
+| `js/router.js` | Hash routes (`#/email`, `#/welcome` = onboarding, `#/hub` = main page, `#/s/<stream>`, `#/s/<stream>/<task>`, `#/groups` = all local groups, `#/g/<group>`, `#/g/<group>/<project>` = a project's page, `#/vacancies`, `#/v/<vacancy>`, `#/apply/<stream, group or vacancy>`, `#/me` = your profile, `#/p/<lead id>` = a lead's, `#/manage/<stream or group>` = the lead view, `#/manage/<group>/<project>` = a project's lead page) and the `href` helpers. |
 | `js/ui.js` | The `html` template tag (escapes interpolations; `raw()` opts out), `richText`, icons and Discord's logo, small shared pieces (badge, back link, progress bar, `eventsCell`), `toast()`. |
 | `css/style.css` | All styles. Look: a loose cue from peopleforapause.org (its red `#d7263d`, blue `#173a8f`, ink, fonts Schibsted Grotesk and Source Serif 4, in `fonts/` under the OFL). Red and blue in balance within every screenful (Spec 23.1); the color roles are in the file's first comment: the sticky top bar's ribbon carries both, a page head pairs a navy title with a red eyebrow chip and its red call to action, red marks what you can do, blue where you are and what things are; the one exception, the Discord button, keeps Discord's blurple and logo. |
 
@@ -80,10 +81,11 @@ fails on a missing element, a console error or a page error. Default url: the li
 half screen, with the sticky top bar) and counts strongly red and blue pixels: it fails where one color has more than
 `max_ratio` (default 3) times the other. Discord's blurple doesn't count: the Discord button keeps its brand color.
 
-The scripts find elements by `data-testid` (`page.get_by_test_id(…)`). Main page: `your-items` (Your groups and
-streams; `your-empty` while empty), `join-group` (`no-group-near`, `start-group`), `join-stream` (`no-application` on
-Getting started), `do-more` (`vacancies-link`), `card-<id>` (a card: stream, group or vacancy; its title link opens
-the page), `me` (your initials), `home`, `back`, `toast`, `restart-demo`. Pages: `welcome-email` / `open-hub`;
+The scripts find elements by `data-testid` (`page.get_by_test_id(…)`). Main page: `your-items` (Your groups and streams;
+`your-empty` while empty; `browse-groups` once you're in a group or wait on one), `join-group` (`no-group-near`,
+`browse-groups`), `join-stream` (`no-application` on Getting started), `do-more` (`start-group`, `vacancies-link`),
+`card-<id>` (a card: stream, group or vacancy; its title link opens the page), `me` (your initials), `home`, `back`,
+`toast`, `restart-demo`. Pages: `welcome-email` / `open-hub`; `all-groups` (the head of the page of all local groups);
 `onboarding-form` / `onboarding-about` / `onboarding-hours` / `onboarding-next`; `stream-<id>`, `group-<id>`,
 `vacancy-<id>` (the page heads) with `apply` (Apply in the head) or `join` (Getting started), `lead-profile`,
 `pending-box` with `meanwhile` and `accept-demo`, `discord-cta` with `discord-connect` (once you're in, until you
@@ -93,8 +95,8 @@ the task page `task-<task>` with `task-action`, `mark-done`, `task-done`, `next-
 `next-meeting` (`luma-link` inside), `team-projects` with `card-<project>`, and `members`; a project's page
 `project-<id>` with `board` and `team-task-<task>` in it (`claim` / `claim-done` / `unclaim` / `reopen` inside); the
 apply page `apply-form` / `expectations` / `workshops` (`luma-link` inside) / `apply-text` / `apply-commit` /
-`apply-submit` / `claude-accepts` (the Demo line where Claude accepts on submit);
-`vacancies`; `profile-me`, `profile-<lead id>`.
+`apply-submit` / `claude-accepts` (the Demo line where Claude accepts on submit); `vacancies`; `profile-me`,
+`profile-<lead id>`.
 
 Lead view: `view-volunteer` / `view-lead` (the switch), `manage-<id>`, `edit-expectations` with `expectations-edit` /
 `expectations-text`, `claude-setting` with `setting-lead` / `setting-claude` (each a label around its radio),

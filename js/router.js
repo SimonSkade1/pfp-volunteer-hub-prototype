@@ -12,6 +12,8 @@ export function parseRoute(hash) {
       return { name: 'home' }
     case 's':
       return c ? { name: 'task', streamId: b, taskId: c } : { name: 'stream', id: b }
+    case 'groups':
+      return { name: 'groups' } // all local groups
     case 'g':
       return c ? { name: 'project', groupId: b, projectId: c } : { name: 'group', id: b }
     case 'vacancies':
@@ -37,6 +39,7 @@ export const href = {
   home: '#/hub',
   stream: (id) => `#/s/${id}`,
   task: (streamId, taskId) => `#/s/${streamId}/${taskId}`,
+  groups: '#/groups',
   group: (id) => `#/g/${id}`,
   project: (groupId, projectId) => `#/g/${groupId}/${projectId}`,
   vacancies: '#/vacancies',

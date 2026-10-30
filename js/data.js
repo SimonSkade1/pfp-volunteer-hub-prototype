@@ -32,7 +32,8 @@ export const welcomeEmail = {
   ps: 'P.S. Just want to stay informed? That’s what the newsletter is for; you don’t need to do anything else.',
 }
 
-// The main page lists the local groups within RADIUS_MI of you, nearest first (Spec 6.2, 17.2).
+// The main page lists the local groups within RADIUS_MI of you, nearest first (Spec 6.2, 17.2); the page of all local
+// groups lists every group (round 5).
 export const RADIUS_MI = 100
 
 // The onboarding's hours choice (Spec 5); your profile shows it.
@@ -440,6 +441,114 @@ export const groups = [
       },
     ],
   },
+  // Round 5: groups further away, in other states, which only the page of all local groups lists; no mock applications.
+  // None in Ohio: Greg's application to Detroit says there's none.
+  {
+    id: 'chicago',
+    kind: 'group',
+    title: 'Chicago',
+    distance: 200,
+    place: 'Chicago, IL',
+    tagline: 'Chicagoland: talks on campus, tabling at street fairs, and letters to our representatives.',
+    lead: 'Elena Novak',
+    members: ['Elena Novak', 'Jamal Wright', 'Kate Murphy', 'Raj Mehta', 'Sarah Goldberg', 'Mike Dombrowski', 'Ana Flores'],
+    meets: 'Every other Tuesday, 6:30 pm',
+    nextMeeting: { date: 'Tue Nov 10, 6:30 pm', place: 'Harold Washington Library', luma: 'lu.ma/pfp-chicago-nov10' },
+    discord: '#chicago',
+    description: [
+      'We’re students, nurses, teachers and retirees from the city and the suburbs who want our representatives to back an international treaty that bans superintelligence.',
+      'We meet every other Tuesday at the Harold Washington Library downtown, and we table at a street fair or on a campus once a month.',
+    ],
+    expectations:
+      'Tell us where in Chicagoland you live and what you’d like to help with. New members join one of our tabling days in their first month.',
+    applyPlaceholder: 'e.g. I live in Evanston and could table on weekends.',
+    claudeAccepts: false,
+    projects: [
+      {
+        id: 'campus',
+        title: 'Talks on three campuses',
+        tagline: 'A talk and questions at Loyola, UIC and DePaul in February.',
+        description:
+          'In February, one of us gives a 30-minute talk on each campus, with questions and a sign-up sheet. Our goal: 100 students in all, and a student group on each campus by spring.',
+        tasks: [
+          { id: 'rooms', title: 'Book the rooms', note: 'Through a student club on each campus.', owner: 'Raj Mehta', done: true },
+          { id: 'speakers', title: 'Find our speakers', note: 'One per campus; Elena gives the first talk.', owner: 'Elena Novak', done: false },
+          { id: 'posters', title: 'Put up posters', note: '20 posters per campus, a week before the talk.', owner: null, done: false },
+        ],
+      },
+    ],
+    applications: [],
+  },
+  {
+    id: 'nashville',
+    kind: 'group',
+    title: 'Nashville',
+    distance: 450,
+    place: 'Nashville, TN',
+    tagline: 'Middle Tennessee: talks at churches and civic clubs, and letters to the editor.',
+    lead: 'Ruth Coleman',
+    members: ['Ruth Coleman', 'Josh Pickett', 'Mary Beth Lyle', 'Terrence Hayes', 'Caleb Turner'],
+    meets: 'Second Monday of the month, 7 pm',
+    nextMeeting: { date: 'Mon Nov 9, 7 pm', place: 'Nashville Public Library', luma: 'lu.ma/pfp-nashville-nov9' },
+    discord: '#nashville',
+    description: [
+      'We’re parents, church members and a few software engineers from Nashville, Franklin and Murfreesboro. Nobody should build a technology that could end us all, and we want Washington to say so.',
+      'We meet on the second Monday of the month at the Nashville Public Library downtown, and we speak wherever we’re invited.',
+    ],
+    expectations: 'Tell us a little about yourself and how you heard about us. I’ll call you before your first meeting.',
+    applyPlaceholder: 'e.g. I’m a nurse in Franklin and could come to the Monday meetings.',
+    claudeAccepts: false,
+    projects: [
+      {
+        id: 'clubs',
+        title: 'Talks at civic clubs',
+        tagline: 'Our 20-minute talk at Rotary and Kiwanis clubs this winter.',
+        description:
+          'Rotary, Kiwanis and Lions clubs invite a speaker every week. We want to give our 20-minute talk at five of them by March, and leave each with a sign-up sheet.',
+        tasks: [
+          { id: 'list', title: 'List the clubs near us', note: 'With each club’s program chair and meeting day.', owner: 'Caleb Turner', done: true },
+          { id: 'pitch', title: 'Ask for a speaking slot', note: 'Email the program chairs our one-page pitch.', owner: null, done: false },
+          { id: 'slides', title: 'Cut our slides to 20 minutes', note: 'From the national talk; keep the questions.', owner: 'Ruth Coleman', done: false },
+        ],
+      },
+    ],
+    applications: [],
+  },
+  {
+    id: 'austin',
+    kind: 'group',
+    title: 'Austin',
+    distance: 1140,
+    place: 'Austin, TX',
+    tagline: 'Central Texas: monthly socials, tabling at UT, and meetings with our representatives.',
+    lead: 'Daniel Salazar',
+    members: ['Daniel Salazar', 'Amber Collins', 'Ben Hartley', 'Lucia Moreno', 'Wes Patterson', 'Jen Kim'],
+    meets: 'Every other Wednesday, 7 pm',
+    nextMeeting: { date: 'Wed Nov 11, 7 pm', place: 'Austin Central Library', luma: 'lu.ma/pfp-austin-nov11' },
+    discord: '#austin',
+    description: [
+      'We’re tech workers, students and parents from Austin and Round Rock. Many of us work in tech, and that’s why we worry about where the race to superintelligence is going.',
+      'We meet every other Wednesday at the Austin Central Library, host a social once a month, and table on the UT campus.',
+    ],
+    expectations: 'Tell us about yourself and which of our Wednesday meetings you could make.',
+    applyPlaceholder: 'e.g. I’m a student at UT and could make most Wednesdays.',
+    claudeAccepts: false,
+    projects: [
+      {
+        id: 'social',
+        title: 'December social',
+        tagline: 'Drinks and a short talk for newcomers, Thu Dec 10.',
+        description:
+          'Our monthly social, this time for newcomers: a 10-minute talk on why we want a pause, then drinks. Our goal: 30 guests and 8 new members.',
+        tasks: [
+          { id: 'venue', title: 'Book the venue', note: 'A back room for 40 downtown.', owner: 'Amber Collins', done: true },
+          { id: 'talk', title: 'Give the 10-minute talk', note: 'From our newcomer slides.', owner: 'Daniel Salazar', done: false },
+          { id: 'invite', title: 'Invite the UT students', note: 'Post in the AI safety student group’s chat.', owner: null, done: false },
+        ],
+      },
+    ],
+    applications: [],
+  },
 ]
 
 // Vacancies (Spec 6.4, 8, 17.4): roles we need volunteers for nationally, plus starting a local group. Each has its
@@ -532,6 +641,24 @@ export const leads = [
       'Physical therapist and mom of two. I started the Detroit area group in spring 2026 with three friends from church; now we’re nine.',
       'I want our representatives to hear about superintelligence from their own neighbors, not just from the AI companies.',
     ],
+  },
+  {
+    id: 'elena-novak',
+    name: 'Elena Novak',
+    place: 'Chicago, IL',
+    about: ['ICU nurse on the North Side. I started the Chicago group in summer 2026, after a talk at my church on where AI is going.'],
+  },
+  {
+    id: 'ruth-coleman',
+    name: 'Ruth Coleman',
+    place: 'Franklin, TN',
+    about: ['Retired high school principal and grandmother of five. I want my grandchildren to grow up in a world where people still make the decisions.'],
+  },
+  {
+    id: 'daniel-salazar',
+    name: 'Daniel Salazar',
+    place: 'Round Rock, TX',
+    about: ['Software engineer at a chip company. I know how fast this is moving, and I want our representatives to know it too.'],
   },
 ]
 

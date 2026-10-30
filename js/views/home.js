@@ -1,13 +1,19 @@
 // The hub's main page (Spec 6), top to bottom: Your groups and streams; Join a local group (while you're in no group
-// and wait on none): the groups within the radius, nearest first, then a quiet line linking the start-a-group vacancy;
-// Join a stream: the streams you're not in, Getting started last; last a quiet line linking the vacancies ("Want to do
-// more?"; Spec 25). Cards have no buttons: a card opens its page, whose head holds Apply (Getting started: Join).
+// and wait on none): the groups within the radius, nearest first, then a small link to the page of all local groups
+// (round 5); Join a stream: the streams you're not in, Getting started last; last, in every state, a quiet line
+// linking the start-a-group vacancy and the vacancies ("Want to do more?"; round 5). Once you're in a group or wait on
+// one, the link to all local groups stays, below your cards. Cards have no buttons: a card opens its page, whose head
+// holds Apply (Getting started: Join).
 
 import { RADIUS_MI, firstName, groups, streams, volunteer } from '../data.js'
 import { href } from '../router.js'
 import { memberCount, membership, progress, projectCounts } from '../state.js'
 import { html, icon, pluralize, statusBadge } from '../ui.js'
 import { hubPage } from './layout.js'
+
+// The link to all local groups: in Join a local group (`join`) red, below your own cards blue (css/style.css).
+const browseGroups = (join = false) =>
+  html`<p class="small-link ${join ? 'small-link-join' : ''}"><a href="${href.groups}" data-testid="browse-groups">Browse all local groups</a></p>`
 
 export function homeView() {
   const start = streams.find((s) => s.kind === 'start')
@@ -26,6 +32,7 @@ export function homeView() {
         ${yours.length
           ? html`<div class="grid">${yours.map(yourCard)}</div>`
           : html`<p class="empty" data-testid="your-empty">You’re in no group or stream yet.</p>`}
+        ${groupFree ? '' : browseGroups()}
       </section>
 
       ${groupFree
@@ -34,7 +41,7 @@ export function homeView() {
             ${nearby.length
               ? html`<div class="grid">${nearby.map(groupCard)}</div>`
               : html`<p class="empty" data-testid="no-group-near">No local groups nearby.</p>`}
-            <p class="quiet-line">Want to start a local group where you live? <a href="${href.vacancy('start-group')}" data-testid="start-group">You can apply to lead one.</a></p>
+            ${browseGroups(true)}
           </section>`
         : ''}
 
@@ -45,7 +52,7 @@ export function homeView() {
           </section>`
         : ''}
 
-      <p class="section quiet-line" data-testid="do-more">Want to do more? <a href="${href.vacancies}" data-testid="vacancies-link">Check out our volunteer vacancies.</a></p>
+      <p class="section quiet-line" data-testid="do-more">Want to do more? <a href="${href.vacancy('start-group')}" data-testid="start-group">Apply to lead a local group</a> or <a href="${href.vacancies}" data-testid="vacancies-link">check out our volunteer vacancies</a>.</p>
     `,
     'wide',
   )
@@ -79,10 +86,13 @@ function yourCard(item) {
   </article>`
 }
 
-function groupCard(group) {
+// A group's card, on the main page and on the page of all local groups, where yours carries its badge.
+export function groupCard(group) {
+  const status = membership(group.id)
   return html`<article class="card" data-testid="card-${group.id}">
+    ${status === 'none' ? '' : html`<div class="card-top"><span></span>${statusBadge(status)}</div>`}
     ${cardTitle(group)}
-    ${metaLine('pin', [`${group.distance} mi from you`, group.place])}
+    ${metaLine('pin', [milesFromYou(group), group.place])}
     <p class="card-text">${group.tagline}</p>
     ${metaLine('users', [pluralize(memberCount(group), 'member')])}
     ${metaLine('calendar', [group.meets])}
@@ -108,3 +118,5 @@ function streamCard(stream) {
 
 export const metaLine = (iconName, parts) =>
   html`<p class="card-meta">${icon(iconName)}${parts.map((part) => html`<span>${part}</span>`)}</p>`
+
+export const milesFromYou = (group) => `${group.distance.toLocaleString('en-US')} mi from you`
